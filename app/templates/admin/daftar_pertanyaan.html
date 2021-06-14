@@ -1,0 +1,154 @@
+{% include "admin/header.html" %}
+{% include "admin/navbar.html" %}
+{% include "admin/sidebar.html" %}
+
+	<div class="main-container">
+		<div class="pd-ltr-20 xs-pd-20-10">
+			<div class="min-height-200px">
+                <div class="page-header">
+					<div class="row">
+						<div class="col-md-6 col-sm-12">
+							<div class="title">
+								<h4>Daftar Pertanyaan</h4>
+							</div>
+						</div>
+						<div class="col-md-6 col-sm-12 text-right">
+							<button id="showModal" class="btn btn-warning btn-round ml-auto" data-toggle="modal" data-target="#tambahPertanyaan">
+                            <i class="fa fa-plus"></i>
+                            Tambah Pertanyaan
+                            </button>
+						</div>
+					</div>
+				</div>
+				<!-- Simple Datatable start -->
+				<div class="card-box mb-30">
+					<div class="pd-20">
+					</div>
+                    <!-- Modal -->
+                    <div class="modal fade" id="tambahPertanyaan" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                          <div class="modal-dialog">
+                              <div class="modal-content">
+                                  <div class="modal-header">
+                                    <h5 class="modal-title" id="staticBackdropLabel">Tambah Pertanyaan</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                      <span aria-hidden="true">&times;</span>
+                                    </button>
+                                  </div>
+                              <div class="modal-body">
+                                  <form action="{{url_for('tambah_pertanyaan')}}" method="post">
+                                      <div class="form-group">
+                                          <label>Pertanyaan</label>
+                                          <textarea name="pertanyaan" id="pertanyaan" class="form-control" required placeholder="Isi Pertanyaanmu Disini" ></textarea>
+                                      </div>
+                                      <div class="form-group">
+                                          <label>Kunci Jawaban</label>
+                                          <textarea name="kunci_jawaban" id="kunci_jawaban" class="form-control" required placeholder="Isi Kunci Jawabanmu Disini"></textarea>
+                                      </div>
+                                      <div class="modal-footer">
+                                        <button type="submit" class="btn btn-primary">Tambah</button>
+                                        <button type="button" class="btn btn-danger" data-dismiss="modal">Keluar</button>
+                                      </div>
+                                  </form>
+                              </div>
+                              </div>
+                          </div>
+                      </div>
+					<div class="pb-20">
+						<table class="display table table-striped table-hover" cellspacing="0" width="100%" id="coba">
+							<thead>
+								<tr>
+									<th>No</th>
+                                    <th>Pertanyaan</th>
+                                    <th>Kunci Jawaban</th>
+									<th class="datatable-nosort">Action</th>
+								</tr>
+							</thead>
+							<tbody>
+								{% for row in tanya %}
+								<tr>
+									<td>{{row.id}}</td>
+									<td>{{row.pertanyaan}}</td>
+                                    <td>{{row.kunci_jawaban}}</td>
+                                    <td>
+										<div class="dropdown">
+											<a class="btn btn-link font-24 p-0 line-height-1 no-arrow dropdown-toggle" href="#" role="button" data-toggle="dropdown">
+												<i class="dw dw-more"></i>
+											</a>
+											<div class="dropdown-menu dropdown-menu-right dropdown-menu-icon-list">
+												<a class="dropdown-item" href="/lihat_pertanyaan/{{row.id_pertanyaan}}" data-toggle="modal" data-target="#lihatPertanyaan{{row.id_pertanyaan}}"><i class="dw dw-eye"></i>Lihat</a>
+												<a class="dropdown-item" href="/edit_pertanyaan/{{row.id_pertanyaan}}" data-toggle="modal" data-target="#editPertanyaan{{row.id_pertanyaan}}"><i class="dw dw-edit2"></i>Edit</a>
+												<a class="dropdown-item" href="/hapus_pertanyaan/{{row.id_pertanyaan}}"><i class="dw dw-delete-3"></i>Hapus</a>
+											</div>
+										</div>
+									</td>
+								</tr>
+<!--                            modal view-->
+                                <div class="modal fade" id="lihatPertanyaan{{row.id_pertanyaan}}" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">-->
+                                <div class="modal-dialog">
+                                  <div class="modal-content">
+                                      <div class="modal-header">
+                                        <h5 class="modal-title" id="staticBackdropLabel">Lihat Pertanyaan</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                          <span aria-hidden="true">&times;</span>
+                                        </button>
+                                      </div>
+                                  <div class="modal-body">
+                                      <form action="" method="post">
+                                          <div class="form-group">
+                                              <label>Pertanyaan</label>
+                                              <input type="hidden" name="id_pertanyaan" id="id_pertanyaan" class="form-control" value="{{row.id_pertanyaan}}" >
+                                              <textarea name="edit_pertanyaan" id="edit_pertanyaan"  class="form-control" required >{{row.pertanyaan}}</textarea>
+                                          </div>
+                                          <div class="form-group">
+                                              <label>Kunci Jawaban</label>
+                                              <textarea name="edit_kunci_jawaban" id="edit_kunci_jawaban" class="form-control" >{{row.kunci_jawaban}}</textarea>
+                                          </div>
+                                          <div class="modal-footer">
+                                            <button type="button" class="btn btn-danger" data-dismiss="modal">Keluar</button>
+                                          </div>
+                                      </form>
+                                  </div>
+                                  </div>
+                              </div>
+                            </div>
+<!--                            modal edit    -->
+                                <div class="modal fade" id="editPertanyaan{{row.id_pertanyaan}}" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">-->
+                                <div class="modal-dialog">
+                                  <div class="modal-content">
+                                      <div class="modal-header">
+                                        <h5 class="modal-title" id="staticBackdropLabel">Edit Pertanyaan</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                          <span aria-hidden="true">&times;</span>
+                                        </button>
+                                      </div>
+                                  <div class="modal-body">
+                                      <form action="{{ url_for('edit_pertanyaan') }}" method="post">
+                                          <div class="form-group">
+                                              <label>Pertanyaan</label>
+                                              <input type="hidden" name="id_pertanyaan" id="id_pertanyaan" class="form-control" value="{{row.id_pertanyaan}}" >
+                                              <textarea name="edit_pertanyaan" id="edit_pertanyaan"  class="form-control" required >{{row.pertanyaan}}</textarea>
+                                          </div>
+                                          <div class="form-group">
+                                              <label>Kunci Jawaban</label>
+                                              <textarea name="edit_kunci_jawaban" id="edit_kunci_jawaban" class="form-control" >{{row.kunci_jawaban}}</textarea>
+                                          </div>
+                                          <div class="modal-footer">
+                                            <button type="submit" class="btn btn-primary">Edit</button>
+                                            <button type="button" class="btn btn-danger" data-dismiss="modal">Keluar</button>
+                                          </div>
+                                      </form>
+                                  </div>
+                                  </div>
+                              </div>
+                            </div>
+								{% endfor %}
+							</tbody>
+						</table>
+					</div>
+				</div>
+				<!-- Simple Datatable End -->
+				<!-- multiple select row Datatable start -->
+			</div>
+		</div>
+    </div>
+{% include "admin/footer.html" %}

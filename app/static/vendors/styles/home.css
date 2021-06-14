@@ -1,0 +1,29 @@
+.main-container .container-fluid {
+	padding-left: 0px;
+	padding-right: 0px;
+}
+
+.main-container .banner-content {
+	background-image: url(../images/laptop.jpg);
+	background-size: cover;
+	background-repeat: no-repeat;
+}
+
+.main-container .banner-content .banner-caption {
+    max-width: 450px;
+	background-color: rgba(250,250,250,0.95);
+	margin: 50px;
+	padding: 50px;
+}
+
+.main-container .banner-content .banner-caption h4 {
+	font-size: 38px;
+	font-weight: 700;
+	color: #31323a;
+	letter-spacing: 0.25px;
+	margin: 0px;
+}
+
+.main-container .banner-content .banner-caption p {
+	margin-bottom: 30px;
+}

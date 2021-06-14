@@ -1,0 +1,127 @@
+{% include "admin/header.html" %}
+{% include "admin/navbar.html" %}
+{% include "admin/sidebar.html" %}
+
+	<div class="main-container">
+		<div class="pd-ltr-20 xs-pd-20-10">
+			<div class="min-height-200px">
+                <div class="page-header">
+					<div class="row">
+						<div class="col-md-6 col-sm-12">
+							<div class="title">
+								<h4>Korpus Kata N-Gram</h4>
+							</div>
+						</div>
+						<div class="col-md-6 col-sm-12 text-right">
+							<button id="showModal" class="btn btn-warning btn-round ml-auto" data-toggle="modal" data-target="#tambahKorpus">
+                            <i class="fa fa-plus"></i>
+                            Tambah Korpus
+                            </button>
+						</div>
+					</div>
+				</div>
+				<!-- Simple Datatable start -->
+				<div class="card-box mb-30">
+					<div class="pd-20">
+                        <h4>Unigram</h4>
+					</div>
+                    <!-- Modal -->
+                    <div class="modal fade" id="tambahKorpus" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="staticBackdropLabel">Tambah Korpus</h5>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <form action="{{ url_for('tambah_korpus_ngram') }}" method="post">
+                                                <div class="form-group">
+                                                    <label>Teks</label>
+                                                    <textarea name="teks" id="teks" class="form-control" required placeholder="Isi Teksmu Disini" ></textarea>
+                                                </div>
+                                                <div class="modal-footer">
+                                                  <button type="submit" class="btn btn-primary">Proses</button>
+                                                  <button type="button" class="btn btn-danger" data-dismiss="modal">Keluar</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                    <div class="pb-20">
+						<table class="display table table-striped table-hover" cellspacing="0" width="100%" id="coba">
+							<thead>
+								<tr>
+									<th>ID</th>
+                                    <th>Unigram</th>
+                                    <th>Jumlah Kemunculan</th>
+								</tr>
+							</thead>
+							<tbody>
+								{% for row in unigram %}
+								<tr>
+									<td>{{row.id_unigram}}</td>
+									<td>{{row.unigram}}</td>
+                                    <td>{{row.jumlah_kemunculan}}</td>
+								</tr>
+                                {% endfor %}
+							</tbody>
+						</table>
+					</div>
+				</div>
+                <div class="card-box mb-30">
+					<div class="pd-20">
+                        <h4>Bigram</h4>
+					</div>
+                    <div class="pb-20">
+						<table class="display table table-striped table-hover" cellspacing="0" width="100%" id="bigram">
+							<thead>
+								<tr>
+									<th>ID</th>
+                                    <th>Bigram</th>
+                                    <th>Jumlah Kemunculan</th>
+								</tr>
+							</thead>
+							<tbody>
+								{% for row in bigram %}
+								<tr>
+									<td>{{row.id_bigram}}</td>
+									<td>{{row.bigram}}</td>
+                                    <td>{{row.jumlah_kemunculan}}</td>
+								</tr>
+                                {% endfor %}
+							</tbody>
+						</table>
+					</div>
+                </div>
+                <div class="card-box mb-30">
+					<div class="pd-20">
+                        <h4>Trigram</h4>
+					</div>
+                    <div class="pb-20">
+						<table class="display table table-striped table-hover" cellspacing="0" width="100%" id="trigram">
+							<thead>
+								<tr>
+									<th>ID</th>
+                                    <th>Trigram</th>
+                                    <th>Jumlah Kemunculan</th>
+								</tr>
+							</thead>
+							<tbody>
+								{% for row in trigram %}
+								<tr>
+									<td>{{row.id_trigram}}</td>
+									<td>{{row.trigram}}</td>
+                                    <td>{{row.jumlah_kemunculan}}</td>
+								</tr>
+                                {% endfor %}
+							</tbody>
+						</table>
+					</div>
+                </div>
+			</div>
+		</div>
+    </div>
+{% include "admin/footer.html" %}

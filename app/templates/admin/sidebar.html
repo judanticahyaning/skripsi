@@ -1,0 +1,42 @@
+<div class="left-side-bar">
+		<div class="brand-logo">
+			<a href="#">
+<!--				<img src="static/vendors/images/deskapp-logo.svg" alt="" class="dark-logo">-->
+				<img src="static/vendors/images/abc_scoring.png" alt="logo_abc" width="200" align="center">
+			</a>
+			<div class="close-sidebar" data-toggle="left-sidebar-close">
+				<i class="ion-close-round"></i>
+			</div>
+		</div>
+		<div class="menu-block customscroll">
+			<div class="sidebar-menu">
+				<ul id="accordion-menu">
+					<li>
+						<a href="{{ url_for('beranda_admin') }}" class="dropdown-toggle no-arrow">
+							<span class="micon dw dw-home"></span><span class="mtext">Beranda</span>
+						</a>
+					</li>
+					<li>
+						<a href="{{ url_for('daftar_pertanyaan') }}" class="dropdown-toggle no-arrow">
+							<span class="micon dw dw-question"></span><span class="mtext">Daftar Pertanyaan</span>
+						</a>
+					</li>
+					<li class="dropdown">
+						<a href="javascript:;" class="dropdown-toggle">
+							<span class="micon dw dw-book"></span><span class="mtext">Daftar Kata</span>
+						</a>
+						<ul class="submenu">
+							<li><a href="{{ url_for('kamus_kata') }}">KBBI</a></li>
+							<li><a href="{{ url_for('korpus_ngram') }}">Korpus N-Gram</a></li>
+						</ul>
+					</li>
+					<li>
+						<a href="{{ url_for('tentang_admin') }}" class="dropdown-toggle no-arrow">
+							<span class="micon dw dw-information"></span><span class="mtext">Tentang</span>
+						</a>
+					</li>
+
+				</ul>
+			</div>
+		</div>
+</div>
