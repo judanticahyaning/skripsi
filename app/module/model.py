@@ -1,5 +1,6 @@
 from flask_sqlalchemy import SQLAlchemy
 from app import app
+from flask_login import UserMixin
 
 db = SQLAlchemy(app)
 
@@ -51,14 +52,24 @@ class trigram(db.Model):
         self.trigram = trigram
         self.jumlah_kemunculan = jumlah_kemunculan
 
-class akun(db.Model):
-    id_akun = db.Column(db.Integer, unique=True, primary_key=True, nullable=False)
-    nama = db.Column(db.String, nullable=False)
-    username = db.Column(db.String, nullable = False, unique=True)
-    password = db.Column(db.String, nullable=False)
+class akun(db.Model, UserMixin):
+    id = db.Column(db.Integer, unique=True, primary_key=True, nullable=False)
+    nama = db.Column(db.String(512), nullable=False)
+    username = db.Column(db.String(512), nullable = False, unique=True)
+    password = db.Column(db.String(512), nullable=False)
+    privileges = db.Column(db.String(15), nullable=False)
 
-    def __repr__(self, id_akun, nama, username, password):
-        self.id_akun = id_akun
+    def __repr__(self, id, nama, username, password, privileges):
+        self.id = id
         self.nama = nama
         self.username = username
         self.password = password
+        self.privileges = privileges
+
+class kamus(db.Model):
+    id = db.Column(db.Integer, unique=True, primary_key=True, nullable=False)
+    kata = db.Column(db.String, nullable=False)
+
+    def __repr__(self, id, kata):
+        self.id = id
+        self.kata = kata

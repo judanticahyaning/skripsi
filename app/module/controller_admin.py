@@ -6,28 +6,30 @@ from nltk.tokenize import sent_tokenize, word_tokenize
 from flask import jsonify
 # from Sastrawi.Stemmer.StemmerFactory import StemmerFactory
 import pandas as pd
-from .model import db, pertanyaan, kbbi, akun
+from .model import db, pertanyaan, kbbi, kamus
 # from pandas.io import sql
 from sqlalchemy import create_engine
 from app import app
-from werkzeug.security import generate_password_hash, check_password_hash
-from flask_login import login_user, login_required, logout_user
+from flask_login import login_required,current_user
 
 @app.route('/beranda_admin')
+@login_required
 def beranda_admin():
-  return render_template("admin/index.html")
+  return render_template("admin/index.html", admin=current_user)
 
 @app.route('/kamus_kata')
+@login_required
 def kamus_kata():
   # cur = mysql.connection.cursor()
   # cur.execute("SELECT * FROM kbbi")
   # data = cur.fetchall()
   # cur.close()
-  listkata = kbbi.query.all()
-  return render_template("admin/kamus_kata.html", kata=listkata)
+  listkata = kamus.query.all()
+  return render_template("admin/kamus_kata.html", kata=listkata, admin=current_user)
   # return render_template("kamus_kata.html")
 
 @app.route('/daftar_pertanyaan')
+@login_required
 def daftar_pertanyaan():
   # cur = mysql.connection.cursor()
   # cur.execute("SELECT * FROM pertanyaan")
@@ -36,9 +38,10 @@ def daftar_pertanyaan():
 
   # return render_template("daftar_pertanyaan.html", tanya = data)
   listpertanyaan = pertanyaan.query.all()
-  return render_template("admin/daftar_pertanyaan.html", tanya=listpertanyaan)
+  return render_template("admin/daftar_pertanyaan.html", tanya=listpertanyaan, admin=current_user)
 
 @app.route('/tambah_pertanyaan', methods = ['POST'])
+@login_required
 def tambah_pertanyaan():
   if request.method == "POST":
     pertanyaans = request.form['pertanyaan']
@@ -52,10 +55,12 @@ def tambah_pertanyaan():
     return redirect(url_for('daftar_pertanyaan'))
 
 @app.route('/lihat_pertanyaan')
+@login_required
 def lihat_pertanyaan():
   return redirect(url_for('admin/daftar_pertanyaan'))
 
 @app.route('/edit_pertanyaan', methods = ['POST'])
+@login_required
 def edit_pertanyaan():
   if request.method == "POST":
     id_pertanyaan = request.form['id_pertanyaan']
@@ -72,6 +77,7 @@ def edit_pertanyaan():
     return redirect(url_for('daftar_pertanyaan'))
 
 @app.route('/hapus_pertanyaan/<string:id_pertanyaan>', methods = ['POST','GET'])
+@login_required
 def hapus_pertanyaan(id_pertanyaan):
   # cur = mysql.connection.cursor()
   # cur.execute("DELETE FROM pertanyaan WHERE id_pertanyaan=%s", (id_pertanyaan,))
@@ -82,14 +88,16 @@ def hapus_pertanyaan(id_pertanyaan):
   return redirect(url_for('daftar_pertanyaan'))
 
 @app.route('/korpus_ngram')
+@login_required
 def korpus_ngram():
   engine = create_engine("mysql+mysqlconnector://root@localhost:3306/tugas_akhir", echo=False)
   list_unigram = engine.execute("SELECT * FROM unigram").fetchall()
   list_bigram = engine.execute("SELECT * FROM bigram").fetchall()
   list_trigram = engine.execute("SELECT * FROM trigram").fetchall()
-  return render_template("admin/korpus_ngram.html", unigram=list_unigram, bigram=list_bigram, trigram=list_trigram)
+  return render_template("admin/korpus_ngram.html", unigram=list_unigram, bigram=list_bigram, trigram=list_trigram, admin=current_user)
 
 @app.route('/tambah_korpus_ngram', methods=['POST'])
+@login_required
 def tambah_korpus_ngram():
   if request.method == "POST":
     # factory = StemmerFactory()
@@ -102,7 +110,8 @@ def tambah_korpus_ngram():
     for i in teks:  # filtering
       teks = re.sub(r'\d+', '', i)
       teks = re.sub(r'[^\w\s]', '', teks)
-      teks = teks.strip()
+      # teks = teks.strip()
+      teks = " ".join(teks.split())
       str.append(teks)
     unigram = []
     bigram = []
@@ -146,54 +155,15 @@ def tambah_korpus_ngram():
   #return render_template("korpus_ngram.html", data=unigram)
   return redirect(url_for('korpus_ngram'))
 
-@app.route('/masuk', methods = ['GET', 'POST'])
-def masuk():
-  if request.method == "POST":
-    username = request.form['username']
-    password = request.form['password']
-    cek = akun.query.filter_by(username=username).first()
-    if username == "admin":
-      return redirect(url_for('index'))
-    elif not cek:
-      return redirect(url_for('daftar'))
-    elif check_password_hash(cek.password, password):
-      login_user(cek,remember=True)
-      return redirect(url_for('index'))
-    # elif not check_password_hash(cek.password, password):
-    #     return jsonify("incorrect password")
-    else:
-      return jsonify("username doesn't exist")
-  return render_template('akun/masuk.html')
-
-@app.route('/daftar')
-def daftar():
-  return render_template('akun/daftar.html')
-
-@app.route('/daftar_akun', methods = ['POST'])
-def daftar_akun():
-  if request.method == "POST":
-    nama = request.form['nama']
-    username = request.form['username']
-    password = request.form['password1']
-    cek_akun = akun.query.filter_by(username=username).first()
-    if cek_akun:
-      return redirect(url_for('daftar'))
-    elif len(username) < 4 and len(username) > 15:
-      pass
-    elif len(nama) < 2:
-      pass
-    else:
-      daftar_akun = akun(nama=nama, username=username, password=generate_password_hash(password, method="sha256"))
-      db.session.add(daftar_akun)
-      db.session.commit()
-      return redirect(url_for('masuk'))
-
-@app.route('/keluar')
-def keluar():
-  logout_user()
-  return redirect(url_for('masuk'))
-
 @app.route('/tentang_admin')
+@login_required
 def tentang_admin():
-  return render_template('admin/tentang.html')
+  return render_template('admin/tentang.html', admin=current_user)
+
+@app.route('/profil_admin' )
+@login_required
+def profil_admin():
+    # pengguna = akun.query.filter_by(username=username).first()
+    return render_template('admin/profil.html', admin=current_user)
+
 

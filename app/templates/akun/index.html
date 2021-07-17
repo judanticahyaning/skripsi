@@ -28,31 +28,24 @@
 						<div class="login-wrap p-4 p-md-5">
 			      			<div class="d-flex">
 			      				<div class="w-100">
-			      					<h3 class="mb-4">Daftar</h3>
+			      					<h3 class="mb-4">Masuk</h3>
 			      				</div>
 			      			</div>
-							<form action="{{url_for('daftar_akun')}}" class="signin-form" method="post">
+							<form action="{{url_for('index')}}" class="signin-form" method="post">
 			      				<div class="form-group mt-3">
-									<input name="nama_lengkap" id="nama_lengkap" type="text" class="form-control" required>
-			      					<label class="form-control-placeholder" >Nama Lengkap</label>
-								</div>
-                                <div class="form-group mt-3">
-									<input name="nama_pengguna" id="username" type="text" class="form-control" required>
-			      					<label class="form-control-placeholder">Nama Pengguna</label>
-								</div>
+									<input type="text" class="form-control" name="nama_pengguna" required>
+									<label class="form-control-placeholder">Nama Pengguna</label>
+			      				</div>
 								<div class="form-group">
-								  <input name="kata_sandi" id="password-field" type="password" class="form-control" required>
+								  <input id="password-field" type="password" class="form-control" name="kata_sandi" required>
 								  <label class="form-control-placeholder">Kata Sandi</label>
 								  <span toggle="#password-field" class="fa fa-fw fa-eye field-icon toggle-password"></span>
 								</div>
 								<div class="form-group">
-								  <input name="privileges" id="privileges" type="hidden" class="form-control" value="user" required>
-								  <label class="form-control-placeholder">Privileges</label>
-								</div>
-								<div class="form-group">
-									<button type="submit" class="form-control btn btn-primary rounded submit px-3">Daftar</button>
+									<button type="submit" class="form-control btn btn-primary rounded submit px-3">Masuk</button>
 								</div>
 		          			</form>
+		         			 <p class="text-center">Belum Punya Akun? <a href="{{url_for('daftar')}}">Daftar</a></p>
 		        		</div>
 		      		</div>
 				</div>
