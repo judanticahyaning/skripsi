@@ -1,0 +1,52 @@
+{% include "user/header.html" %}
+{% include "user/navbar.html" %}
+{% include "user/sidebar.html" %}
+<div class="main-container" xmlns="http://www.w3.org/1999/html">
+    <div class="pd-ltr-20 xs-pd-20-10">
+        <div class="min-height-200px">
+            <div class="page-header">
+                <div class="row">
+                    <div class="col-md-6 col-sm-12">
+                        <div class="title">
+                            <h4>Hasil Proses</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-box mb-30">
+                <div class="pd-20">
+<!--                    <div class="form-group">-->
+<!--                        <label><b>Pertanyaan</b></label>-->
+<!--                        <input name="sebelum_deteksi" id="sebelum_deteksi"  class="form-control" required value="{{pertanyaan}}">-->
+<!--                    </div>-->
+<!--                    <div class="form-group">-->
+<!--                        <label><b>Sebelum Deteksi dan Koreksi</b></label>-->
+<!--                        <textarea name="sebelum_deteksi" id="sebelum_deteksi"  class="form-control" required >{{jawaban}}</textarea>-->
+<!--                    </div>-->
+<!--                    <div class="form-group">-->
+<!--                        <label><b>Setelah Deteksi dan Koreksi</b></label>-->
+<!--                        <textarea name="setelah_deteksi" id="setelah_deteksi"  class="form-control" required >{{rekomendasi}}</textarea>-->
+<!--                    </div>-->
+<!--                    <div class="form-group">-->
+<!--                        <label><b>Nilai Esai</b></label>-->
+<!--                        <textarea name="nilai" id="nilai"  class="form-control" required >{{value}}</textarea>-->
+<!--                    </div>-->
+                        <label><b>Sebelum Deteksi dan Koreksi</b></label>
+                        <p id="sebelum">{{jawaban}}</p>
+                        <label><b>Setelah Deteksi dan Koreksi</b></label>
+                        <p id="setelah" onchange="proses_highlight()">{{rekomendasi}}</p>
+                    <div >
+                        <label><b>Ranking Rekomendasi Kata</b></label>
+                        <p id="ranking" >{{rank}}</p>
+                    </div>
+                    <div class="form-group">
+                        <label><b>Nilai Esai</b></label>
+<!--                        <textarea name="nilai" id="nilai"  class="form-control" required >{{value}}</textarea>-->
+                        <p>{{penilaian}}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% include "user/footer.html" %}

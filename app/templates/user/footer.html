@@ -35,5 +35,41 @@
 			$('#trigram').DataTable();
 		 });
 		</script>
+		<script>
+		$(document).ready(function() {
+
+<!--			$("sebelum").find(".highlight").removeClass("highlight");-->
+			const kal1 = document.getElementById('sebelum').innerHTML;
+			const kal2 = document.getElementById('setelah').innerHTML;
+<!--			alert("aleert");-->
+
+			var kal1part= kal1.split(' ');
+			var kal2part= kal2.split(' ');
+			console.log(kal1part);
+			console.log(kal2part);
+
+			var score = 0;
+
+			for(var i = 0; i<kal1part.length; i++)
+			{
+
+				 if(kal1part[i] === kal2part[i]){
+					 score++;
+				 }
+				 else {
+				 	console.log(kal1part[i]);
+				 	a = kal1part[i]
+				 	var custfilter = new RegExp(kal1part[i], "ig");
+					var repstr = "<span class='highlight'>" + kal1part[i] + "</span>";
+					console.log(repstr)
+
+					$('#sebelum').each(function() {
+						$(this).html($(this).html().replace(custfilter, repstr));
+					})
+				 }
+			}
+
+		});
+		</script>
 </body>
 </html>

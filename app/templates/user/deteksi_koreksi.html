@@ -18,8 +18,16 @@
 					<div class="pd-20">
 						<form action="{{ url_for('proses_deteksi_koreksi') }}" method="post">
 							<div class="form-group">
+								<select class="form-control" name="pertanyaan">
+									<option>Pilih Pertanyaan</option>
+									{% for row in tanya %}
+										<option value="{{row.id_pertanyaan}}">{{row.pertanyaan}}</option>
+									{% endfor %}
+								</select>
+							</div>
+							<div class="form-group">
 								<label>Jawaban</label>
-								<textarea name="jawaban" id="jawaban" class="form-control" required placeholder="Isi Jawabanmu Disini" ></textarea>
+								<textarea name="jawaban" id="jawaban" class="form-control" required placeholder="Isi Jawabanmu Disini" >{{jawaban}}</textarea>
 							</div>
 							<div class="form-group">
 								<button type="submit" class="btn btn-primary">Coba Deteksi Penulisan</button>
@@ -43,7 +51,7 @@
 							</div>
 							<div class="form-group">
 									<label>Jawaban</label>
-									<textarea name="jawab" id="jawab" class="form-control" required placeholder="Isi Jawabanmu Disini" ></textarea>
+									<textarea name="jawab" id="jawab" class="form-control" value = "{{jawaban}}" required placeholder="Isi Jawabanmu Disini" ></textarea>
 							</div>
 							<div class="form-group">
 								<button type="submit" class="btn btn-primary">Coba Penilaian</button>
@@ -51,25 +59,11 @@
 						</form>
 					</div>
 				</div>
-<!--				<div class="card-box mb-30">-->
-<!--					<div class="pb-20">-->
-<!--
-						<table class="display table table-striped table-hover" cellspacing="0" width="100%" id="coba">
-							<thead>
-								<tr>
-									<th>ID</th>
-									<th>Kata</th>
-								</tr>
-							</thead>
-							<tbody>
-							{% for row in hasil %}
-								<tr>
-									<td>{{row.unigram}}</td>
-									<td>{{row.jumlah_kemunculan}}</td>
-								</tr>
-							{% endfor %}
-							</tbody>
-						</table>
+				<div class="card-box mb-30">
+					<div class="pd-20">
+						{{jawaban}}
+						{{similaritas}}
+						{{value}}
 					</div>
 				</div>
 			</div>
