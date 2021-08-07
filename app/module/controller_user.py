@@ -1,4 +1,6 @@
 import math
+import multiprocessing
+
 from sqlalchemy.dialects.sqlite import json
 from sqlalchemy.orm import sessionmaker
 from app import app
@@ -22,6 +24,8 @@ from Sastrawi.StopWordRemover.StopWordRemoverFactory import StopWordRemoverFacto
 from itertools import groupby
 import threading
 import queue
+import jaro
+from multiprocessing import Process, Queue
 
 
 @app.route('/beranda_user')
@@ -701,7 +705,7 @@ def grup_kamus(kamus):
         kms[i] = list(ele)
     return kms
 
-def jaro_kamus(token, hasil):
+def jaro_kamus(q, token, hasil):
     hsl = []
     for i in token:
         result = {0: "_"}
@@ -715,14 +719,16 @@ def jaro_kamus(token, hasil):
                     temp.append(k)
                     result[j] = temp
                 if s1 != k:
-                    jaro = jaro_winkler(s1, k)
-                    if (jaro >= 0.7):
+                    jaro_wink = jaro.jaro_winkler_metric(s1, k)
+                    # jaro = jaro_winkler(s1, k)
+                    if (jaro_wink >= 0.7):
                         temp.append(k)
                         result[j] = temp
         result[j] = "_"
         hsl.append(result)
-    return hsl
-
+        # q.put(hsl)
+        # return hsl
+        return q.put(hsl)
 @app.route('/deteksi_koreksi')
 @login_required
 def deteksi_koreksi():
@@ -785,46 +791,17 @@ def proses_deteksi_koreksi():
             i.insert(0, "_")
             i.insert(len(i), "_")
 
+        # jaro winkler
+        ctx = multiprocessing.get_context('spawn')
+        q = ctx.Queue()
+        p = [multiprocessing.Process(target=jaro_kamus, args=(q, token, hasil, ))]
+        for proses in p:
+            proses.start()
+        for proses in p:
+            proses.join()
         # hsl = jaro_kamus(token, hasil)
-        # return jsonify(hsl)
-
-        # hsl = []
-        # my_queue = queue.Queue()
-        # thread = []
-        # proses = threading.Thread(target=lambda q, arg1:q.put(jaro_kamus(arg1)), args=(my_queue, token, hasil))
-        # # proses = threading.Thread(target=jaro_kamus, name="thread1", args=[token,hasil,my_queue])
-        # proses.start()
-        # proses.join()
-        # thread.append(proses)
-        # for i in thread:
-        #     i.join()
-
-        # while not my_queue.empty():
-        #     result = my_queue.get()
-        #     print(result)
-        # return jsonify(hsl)
-        hsl = []
-        for i in token:
-            result = {0: "_"}
-            for j in range(len(i)):
-                temp = []
-                s1 = i[j]
-                # if not s1 == "_":
-                #     for k in kata[s1[0]]:
-                for k in hasil:
-                        if s1 == k:
-                            temp.append(k)
-                            result[j] = temp
-                        if s1 != k:
-                            jaro = jaro_winkler(s1, k)
-                            # jaro_thread = threading.Thread(target=jaro_winkler, args=(s1, k))
-                            # jaro_thread.start()
-                            # jaro_thread.join()
-                            if (jaro >= 0.7):
-                                temp.append(k)
-                                result[j] = temp
-            result[j] = "_"
-            hsl.append(result)
+        print(q.get())
+        return jsonify(q.get())
 
         # pemodelan n-gram
         unigram = []
@@ -970,7 +947,7 @@ def proses_deteksi_koreksi():
         # penilaian = nilai(rekomendasi, kunci)
         # return jsonify(rekomendasi)
 
-        return render_template('user/hasil.html', jawaban=jawaban, rekomendasi=rekomendasi)
+        # return render_template('user/hasil.html', jawaban=jawaban, rekomendasi=rekomendasi)
 
 @app.route('/hasil')
 @login_required
