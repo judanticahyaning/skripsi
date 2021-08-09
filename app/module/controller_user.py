@@ -26,7 +26,7 @@ import threading
 import queue
 import jaro
 from multiprocessing import Process, Queue
-
+import  multiprocessing
 
 @app.route('/beranda_user')
 @login_required
@@ -705,7 +705,7 @@ def grup_kamus(kamus):
         kms[i] = list(ele)
     return kms
 
-def jaro_kamus(q, token, hasil):
+def jaro_kamus(token, hasil):
     hsl = []
     for i in token:
         result = {0: "_"}
@@ -727,8 +727,32 @@ def jaro_kamus(q, token, hasil):
         result[j] = "_"
         hsl.append(result)
         # q.put(hsl)
-        # return hsl
-        return q.put(hsl)
+        return hsl
+
+def coba_jaro_kamus(token, return_dict):
+    engine = create_engine("mysql+mysqlconnector://root@localhost:3306/tugas_akhir", echo=False)
+    sql = engine.execute("SELECT DISTINCT kata FROM kamus").fetchall()
+    hasil = [row[0] for row in sql]
+
+    hsl = []
+    for i in token:
+        result = {0: "_"}
+        for j in range(len(i)):
+            temp = []
+            s1 = i[j]
+            for k in hasil:
+                if s1 == k:
+                    temp.append(k)
+                    result[j] = temp
+                if s1 != k:
+                    jaro_wink = jaro.jaro_winkler_metric(s1, k)
+                    # jaro = jaro_winkler(s1, k)
+                    if (jaro_wink >= 0.7):
+                        temp.append(k)
+                        result[j] = temp
+        result[j] = "_"
+        hsl.append(result)
+    return_dict[token] = hsl
 @app.route('/deteksi_koreksi')
 @login_required
 def deteksi_koreksi():
@@ -739,6 +763,7 @@ def deteksi_koreksi():
 @login_required
 def proses_deteksi_koreksi():
     if request.method == "POST":
+        # return len(getJaroKamus())
 
         # ambil nilai dari form html
         jawaban = request.form['jawaban']
@@ -752,12 +777,11 @@ def proses_deteksi_koreksi():
         # preprocessing
         jawaban = jawaban.lower()
         token = preprocessing(jawaban)
-        # return jsonify(token)
 
         # perhitungan jarak token dengan kata kamus dgn jaro winkler
         engine = create_engine("mysql+mysqlconnector://root@localhost:3306/tugas_akhir", echo=False)
         sql = engine.execute("SELECT DISTINCT kata FROM kamus").fetchall()
-        hasil = [row[0] for row in sql]
+        hasil = tuple([row[0] for row in sql])
 
         # merge token
         # tkn = satu_dimensi_token(token)
@@ -784,24 +808,24 @@ def proses_deteksi_koreksi():
         # kata = grup_kamus(kata)
         # return jsonify(kata)
 
-        # print(len(kata))
-
         # menambahkan underscore token
         for i in token:
             i.insert(0, "_")
             i.insert(len(i), "_")
 
         # jaro winkler
-        ctx = multiprocessing.get_context('spawn')
-        q = ctx.Queue()
-        p = [multiprocessing.Process(target=jaro_kamus, args=(q, token, hasil, ))]
-        for proses in p:
-            proses.start()
-        for proses in p:
-            proses.join()
-        # hsl = jaro_kamus(token, hasil)
-        print(q.get())
-        return jsonify(q.get())
+        hsl = jaro_kamus(token, hasil)
+
+        # ctx = multiprocessing.get_context('spawn')
+        # q = Queue()
+        # p = [Process(target=coba_jaro_kamus, args=(q, token[i], )) for i, value in enumerate(token)]
+        # for proses in p:
+        #     proses.start()
+        #     proses.join()
+        #
+        # for proses in p:
+        #     print(q.get())
+        # return jsonify(token)
 
         # pemodelan n-gram
         unigram = []
@@ -811,8 +835,6 @@ def proses_deteksi_koreksi():
         bigram_kiri = []
         for i, value in enumerate(token):
             bigram_kiri.append(buat_bigram_kiri(token[i], hsl[i]))
-            # t2 = bigram_kiri.append(threading.Thread(target=buat_bigram_kiri, args=(token[i], hsl[i], )))
-
 
         bigram_kanan = []
         for i, value in enumerate(token):
@@ -837,44 +859,39 @@ def proses_deteksi_koreksi():
         depan_trigram = huruf_depan(merge_trigram)
 
         # hitung jumlah kemunculan masing-masing n-gram
-        r_unigram = []
         uni = engine.execute("SELECT unigram, CAST(SUM(jumlah_kemunculan) AS int) FROM unigram GROUP BY unigram")
-        for row in uni:
-            r_unigram.append(list(row))
+        r_unigram = tuple([list(row) for row in uni])
 
-        kata_uni = [n for n in r_unigram if n[0][0] in depan_uni]
+        kata_uni = tuple([n for n in r_unigram if n[0][0] in depan_uni])
+
         muncul_uni = []
         for i, value in enumerate(unigram):
             muncul_uni.append(kemunculan_unigram(kata_uni, unigram[i]))
 
         # bigram kiri
-        r_bigram_kiri = []
         kiri = engine.execute("SELECT bigram, CAST(SUM(jumlah_kemunculan) AS int) FROM bigram GROUP BY bigram")
-        for row in kiri:
-            r_bigram_kiri.append(list(row))
+        r_bigram_kiri = tuple([list(row) for row in kiri])
 
-        kata_kiri = [n for n in r_bigram_kiri if n[0][0] in depan_kiri]
-
+        kata_kiri = tuple([n for n in r_bigram_kiri if n[0][0] in depan_kiri])
         muncul_kiri = []
         for i, value in enumerate(bigram_kiri):
             muncul_kiri.append(kemunculan_bigram_kiri(kata_kiri,bigram_kiri[i]))
 
         # bigram kanan
-        kata_kanan = [n for n in r_bigram_kiri if n[0][0] in depan_kanan]
+        kata_kanan = tuple([n for n in r_bigram_kiri if n[0][0] in depan_kanan])
         muncul_kanan = []
         for i, value in enumerate(bigram_kanan):
             muncul_kanan.append(kemunculan_bigram_kanan(kata_kanan, bigram_kanan[i]))
 
         # trigram
-        r_trigram = []
         tri = engine.execute("SELECT trigram, CAST(SUM(jumlah_kemunculan) AS int) FROM trigram GROUP BY trigram")
-        for row in tri:
-            r_trigram.append(list(row))
-        kata_tri = [n for n in r_trigram if n[0][0] in depan_trigram]
+        r_trigram = tuple([list(row) for row in tri])
+        kata_tri = tuple([n for n in r_trigram if n[0][0] in depan_trigram])
 
         muncul_tri = []
         for i, value in enumerate(trigram):
             muncul_tri.append(kemunculan_trigram(kata_tri, trigram[i]))
+        # return jsonify(muncul_tri)
 
         # hitung total kemunculan
         tot_unigram = []
@@ -947,7 +964,23 @@ def proses_deteksi_koreksi():
         # penilaian = nilai(rekomendasi, kunci)
         # return jsonify(rekomendasi)
 
-        # return render_template('user/hasil.html', jawaban=jawaban, rekomendasi=rekomendasi)
+        return render_template('user/hasil.html', jawaban=jawaban, rekomendasi=rekomendasi)
+
+def getJaroKamus():
+
+    # jobs = []
+    # for t in tokens:
+    #     p = multiprocessing.Process(target=jaro_kamus,
+    #                                 args=(t, hasilKamus, return_dict))
+    #     jobs.append(p)
+    #     p.start()
+    #
+    # for proc in jobs:
+    #     proc.join()
+    p = multiprocessing.Pool(2)
+    res = p.map(t, [1,2,4])
+    p.close()
+    return res
 
 @app.route('/hasil')
 @login_required

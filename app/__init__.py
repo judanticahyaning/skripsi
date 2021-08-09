@@ -1,5 +1,6 @@
 from flask import Flask
 from flask_login import LoginManager
+import multiprocessing
 app = Flask(__name__)
 
 from app.module.model import *
