@@ -27,6 +27,8 @@ import queue
 import jaro
 from multiprocessing import Process, Queue
 import  multiprocessing
+import asyncio
+from time import process_time
 
 @app.route('/beranda_user')
 @login_required
@@ -89,20 +91,19 @@ def jaro_distance(s1, s2):
     return dj
 
 def jaro_winkler(s1, s2):
-  jaro_dist = jaro_distance(s1, s2)
-  prefix = 0
-  # untuk mencari nilai prefix
-  for i in range(min(len(s1), len(s2))):
-    if (s1[i] == s2[i]):
-      prefix += 1
-    else:
-      break
+    jaro_dist = jaro_distance(s1, s2)
+    prefix = 0
+    # untuk mencari nilai prefix
+    for i in range(min(len(s1), len(s2))):
+        if (s1[i] == s2[i]):
+          prefix += 1
+        else:
+          break
+    # maksimum prefix yaitu 4 karakter
+    prefix = min(4, prefix)
 
-  # maksimum prefix yaitu 4 karakter
-  prefix = min(4, prefix)
-
-  jaro_dist += 0.1 * prefix * (1 - jaro_dist)
-  return jaro_dist
+    jaro_dist += 0.1 * prefix * (1 - jaro_dist)
+    return jaro_dist
 
 def preprocessing (jawaban):
     # case folding
@@ -118,7 +119,7 @@ def preprocessing (jawaban):
         # jawaban = jawaban.strip()
         jawaban = " ".join(jawaban.split())
         str.append(jawaban)
-    print(str)
+    # print(str)
     # tokenisasi kata
     # token_kata = []
     # for kalimat in str:
@@ -727,13 +728,9 @@ def jaro_kamus(token, hasil):
         result[j] = "_"
         hsl.append(result)
         # q.put(hsl)
-        return hsl
+    return hsl
 
-def coba_jaro_kamus(token, return_dict):
-    engine = create_engine("mysql+mysqlconnector://root@localhost:3306/tugas_akhir", echo=False)
-    sql = engine.execute("SELECT DISTINCT kata FROM kamus").fetchall()
-    hasil = [row[0] for row in sql]
-
+def coba_jaro_kamus(q, token, hasil):
     hsl = []
     for i in token:
         result = {0: "_"}
@@ -751,8 +748,8 @@ def coba_jaro_kamus(token, return_dict):
                         temp.append(k)
                         result[j] = temp
         result[j] = "_"
-        hsl.append(result)
-    return_dict[token] = hsl
+        # hsl.append(result)
+    return q.put(result)
 @app.route('/deteksi_koreksi')
 @login_required
 def deteksi_koreksi():
@@ -763,50 +760,23 @@ def deteksi_koreksi():
 @login_required
 def proses_deteksi_koreksi():
     if request.method == "POST":
-        # return len(getJaroKamus())
-
+        start = process_time()
         # ambil nilai dari form html
         jawaban = request.form['jawaban']
 
         # simpan nilai utk scoring
         # pertanyaan = request.form['pertanyaan']
-        # engine = create_engine("mysql+mysqlconnector://root@localhost:3306/tugas_akhir", echo=False)
+        engine = create_engine("mysql+mysqlconnector://root@localhost:3306/tugas_akhir", echo=False)
         # sql = engine.execute("SELECT kunci_jawaban FROM pertanyaan WHERE id_pertanyaan=" + pertanyaan).fetchall()
-        # kunci = [row[0] for row in sql]
+        # kunci = tuple([row[0] for row in sql])
 
         # preprocessing
         jawaban = jawaban.lower()
         token = preprocessing(jawaban)
 
         # perhitungan jarak token dengan kata kamus dgn jaro winkler
-        engine = create_engine("mysql+mysqlconnector://root@localhost:3306/tugas_akhir", echo=False)
         sql = engine.execute("SELECT DISTINCT kata FROM kamus").fetchall()
         hasil = tuple([row[0] for row in sql])
-
-        # merge token
-        # tkn = satu_dimensi_token(token)
-
-        # cari nilai min max ketika searching
-        # min = 1000
-        # max = 0
-        # for i in token:
-        #     sortedwords = sorted(i, key=len)
-        #     if len(sortedwords[0]) < min:
-        #         min = len(sortedwords[0])
-        #     if len(sortedwords[-1]) > max:
-        #         max = len(sortedwords[-1])
-        # # antisipasi kelebihan dan kekurangan huruf
-        # min -= 3
-        # max += 3
-        # # print(min, max)
-
-        # untuk cek huruf depan token dan kamus
-        # depan_token = huruf_depan(tkn)
-        # depan_kamus = huruf_depan(hasil)
-        #
-        # kata = [n for n in hasil if len(n) >= min and len(n) <= max and n[0] in depan_token]
-        # kata = grup_kamus(kata)
-        # return jsonify(kata)
 
         # menambahkan underscore token
         for i in token:
@@ -816,148 +786,79 @@ def proses_deteksi_koreksi():
         # jaro winkler
         hsl = jaro_kamus(token, hasil)
 
-        # ctx = multiprocessing.get_context('spawn')
-        # q = Queue()
-        # p = [Process(target=coba_jaro_kamus, args=(q, token[i], )) for i, value in enumerate(token)]
-        # for proses in p:
-        #     proses.start()
-        #     proses.join()
-        #
-        # for proses in p:
-        #     print(q.get())
-        # return jsonify(token)
-
         # pemodelan n-gram
-        unigram = []
-        for i, value in enumerate(token):
-            unigram.append(buat_unigram(hsl[i]))
+        unigram = tuple([buat_unigram(hsl[i]) for i, value in enumerate(token)])
+        bigram_kiri = tuple([buat_bigram_kiri(token[i], hsl[i]) for i, value in enumerate(token)])
+        bigram_kanan = tuple([buat_bigram_kanan(token[i], hsl[i]) for i, value in enumerate(token)])
+        trigram = tuple([buat_trigram(token[i], hsl[i]) for i, value in enumerate(token)])
 
-        bigram_kiri = []
-        for i, value in enumerate(token):
-            bigram_kiri.append(buat_bigram_kiri(token[i], hsl[i]))
-
-        bigram_kanan = []
-        for i, value in enumerate(token):
-            bigram_kanan.append(buat_bigram_kanan(token[i], hsl[i]))
-
-        trigram = []
-        for i, value in enumerate(token):
-            trigram.append(buat_trigram(token[i], hsl[i]))
-
-        # merge
-        merge_uni = satu_dimensi_token(unigram)
-        merge_kiri = satu_dimensi_token(bigram_kiri)
-        merge_kanan = satu_dimensi_token(bigram_kanan)
-        merge_trigram = satu_dimensi_token(trigram)
+        # # merge
+        # merge_uni = satu_dimensi_token(unigram)
+        # merge_kiri = satu_dimensi_token(bigram_kiri)
+        # merge_kanan = satu_dimensi_token(bigram_kanan)
+        # merge_trigram = satu_dimensi_token(trigram)
         # hapus underscore uni
-        merge_uni_new = [x[0] for x in merge_uni if not x[0] == "_"]
+        # merge_uni_new = [x[0] for x in merge_uni if not x[0] == "_"]
 
         # mencari kata depan masing2 (uni masih blm bisa kata depan)
-        depan_uni = huruf_depan(merge_uni_new)
-        depan_kiri = huruf_depan(merge_kiri)
-        depan_kanan = huruf_depan(merge_kanan)
-        depan_trigram = huruf_depan(merge_trigram)
+        # depan_uni = huruf_depan(merge_uni_new)
+        # depan_kiri = huruf_depan(merge_kiri)
+        # depan_kanan = huruf_depan(merge_kanan)
+        # depan_trigram = huruf_depan(merge_trigram)
 
         # hitung jumlah kemunculan masing-masing n-gram
         uni = engine.execute("SELECT unigram, CAST(SUM(jumlah_kemunculan) AS int) FROM unigram GROUP BY unigram")
         r_unigram = tuple([list(row) for row in uni])
-
-        kata_uni = tuple([n for n in r_unigram if n[0][0] in depan_uni])
-
-        muncul_uni = []
-        for i, value in enumerate(unigram):
-            muncul_uni.append(kemunculan_unigram(kata_uni, unigram[i]))
+        # kata_uni = tuple([n for n in r_unigram if n[0][0] in depan_uni])
+        muncul_uni = tuple([kemunculan_unigram(r_unigram, unigram[i]) for i, value in enumerate(unigram)])
+        end = process_time()
+        print(end - start)
+        return jsonify("x")
 
         # bigram kiri
         kiri = engine.execute("SELECT bigram, CAST(SUM(jumlah_kemunculan) AS int) FROM bigram GROUP BY bigram")
         r_bigram_kiri = tuple([list(row) for row in kiri])
-
-        kata_kiri = tuple([n for n in r_bigram_kiri if n[0][0] in depan_kiri])
-        muncul_kiri = []
-        for i, value in enumerate(bigram_kiri):
-            muncul_kiri.append(kemunculan_bigram_kiri(kata_kiri,bigram_kiri[i]))
+        # kata_kiri = tuple([n for n in r_bigram_kiri if n[0][0] in depan_kiri])
+        muncul_kiri = tuple([kemunculan_bigram_kiri(r_bigram_kiri,bigram_kiri[i]) for i, value in enumerate(bigram_kiri)])
 
         # bigram kanan
-        kata_kanan = tuple([n for n in r_bigram_kiri if n[0][0] in depan_kanan])
-        muncul_kanan = []
-        for i, value in enumerate(bigram_kanan):
-            muncul_kanan.append(kemunculan_bigram_kanan(kata_kanan, bigram_kanan[i]))
+        # kata_kanan = tuple([n for n in r_bigram_kiri if n[0][0] in depan_kanan])
+        muncul_kanan = tuple([kemunculan_bigram_kanan(r_bigram_kiri, bigram_kanan[i]) for i, value in enumerate(bigram_kanan)])
 
         # trigram
         tri = engine.execute("SELECT trigram, CAST(SUM(jumlah_kemunculan) AS int) FROM trigram GROUP BY trigram")
         r_trigram = tuple([list(row) for row in tri])
-        kata_tri = tuple([n for n in r_trigram if n[0][0] in depan_trigram])
-
-        muncul_tri = []
-        for i, value in enumerate(trigram):
-            muncul_tri.append(kemunculan_trigram(kata_tri, trigram[i]))
-        # return jsonify(muncul_tri)
+        # kata_tri = tuple([n for n in r_trigram if n[0][0] in depan_trigram])
+        muncul_tri = tuple([kemunculan_trigram(r_trigram, trigram[i]) for i, value in enumerate(trigram)])
 
         # hitung total kemunculan
-        tot_unigram = []
-        for i, value in enumerate(unigram):
-            tot_unigram.append(total_unigram(hsl[i], unigram[i]))
-
-        tot_bigram_kiri = []
-        for i, value in enumerate(bigram_kiri):
-            tot_bigram_kiri.append(total_bigram_kiri(hsl[i], bigram_kiri[i]))
-
-        tot_bigram_kanan = []
-        for i, value in enumerate(bigram_kanan):
-            tot_bigram_kanan.append(total_bigram_kanan(hsl[i], bigram_kanan[i]))
-
-        tot_trigram = []
-        for i, value in enumerate(trigram):
-            tot_trigram.append(total_trigram(hsl[i], trigram[i]))
+        tot_unigram = tuple([total_unigram(hsl[i], unigram[i]) for i, value in enumerate(unigram)])
+        tot_bigram_kiri = tuple([total_bigram_kiri(hsl[i], bigram_kiri[i]) for i, value in enumerate(bigram_kiri)])
+        tot_bigram_kanan = tuple([total_bigram_kanan(hsl[i], bigram_kanan[i]) for i, value in enumerate(bigram_kanan)])
+        tot_trigram = tuple([total_trigram(hsl[i], trigram[i]) for i, value in enumerate(trigram)])
 
         # hitung probabilitas
-        pro_unigram = []
-        for i, value in enumerate(unigram):
-            pro_unigram.append(probabilitas_unigram(hsl[i], tot_unigram[i], unigram[i]))
-
-        pro_bigram_kiri = []
-        for i, value in enumerate(bigram_kiri):
-            pro_bigram_kiri.append(probabilitas_bigram_kiri(hsl[i], tot_bigram_kiri[i], bigram_kiri[i]))
-
-        pro_bigram_kanan = []
-        for i, value in enumerate(bigram_kanan):
-            pro_bigram_kanan.append(probabilitas_bigram_kanan(hsl[i], tot_bigram_kanan[i], bigram_kanan[i]))
-
-        pro_trigram = []
-        for i, value in enumerate(trigram):
-            pro_trigram.append(probabilitas_trigram(hsl[i], tot_trigram[i], trigram[i]))
+        pro_unigram = tuple([probabilitas_unigram(hsl[i], tot_unigram[i], unigram[i]) for i, value in enumerate(unigram)])
+        pro_bigram_kiri = tuple([probabilitas_bigram_kiri(hsl[i], tot_bigram_kiri[i], bigram_kiri[i]) for i, value in enumerate(bigram_kiri)])
+        pro_bigram_kanan = tuple([probabilitas_bigram_kanan(hsl[i], tot_bigram_kanan[i], bigram_kanan[i]) for i, value in enumerate(bigram_kanan)])
+        pro_trigram = tuple([probabilitas_trigram(hsl[i], tot_trigram[i], trigram[i]) for i, value in enumerate(trigram)])
 
         # hitung smoothing jelinek mercer
-        jelinek_kiri = []
-        for i, value in enumerate(bigram_kiri):
-            jelinek_kiri.append(mercer_bigram_kiri(hsl[i], bigram_kiri[i], pro_unigram[i], pro_bigram_kiri[i]))
-
-        jelinek_kanan = []
-        for i, value in enumerate(bigram_kanan):
-            jelinek_kanan.append(mercer_bigram_kanan(hsl[i], bigram_kanan[i], pro_unigram[i], pro_bigram_kanan[i]))
-
-        jelinek_trigram = []
-        for i, value in enumerate(trigram):
-            jelinek_trigram.append(mercer_trigram(hsl[i], trigram[i], pro_bigram_kiri[i], pro_bigram_kanan[i], pro_trigram[i]))
+        jelinek_kiri = tuple([mercer_bigram_kiri(hsl[i], bigram_kiri[i], pro_unigram[i], pro_bigram_kiri[i]) for i, value in enumerate(bigram_kiri)])
+        jelinek_kanan = tuple([mercer_bigram_kanan(hsl[i], bigram_kanan[i], pro_unigram[i], pro_bigram_kanan[i]) for i, value in enumerate(bigram_kanan)])
+        jelinek_trigram = tuple([mercer_trigram(hsl[i], trigram[i], pro_bigram_kiri[i], pro_bigram_kanan[i], pro_trigram[i]) for i, value in enumerate(trigram)])
 
         # hitung skor
-        skor_kata = []
-        for i, value in enumerate(hsl):
-            skor_kata.append(hitung_skor(hsl[i], jelinek_kiri[i], jelinek_kanan[i], jelinek_trigram[i]))
+        skor_kata = tuple([hitung_skor(hsl[i], jelinek_kiri[i], jelinek_kanan[i], jelinek_trigram[i]) for i, value in enumerate(hsl)])
 
         # peringkatan
-        rank_skor = []
-        for i, value in enumerate(hsl):
-            rank_skor.append(skor_ranking(hsl[i], skor_kata[i]))
-        # return jsonify(rank_skor)
+        rank_skor = tuple([skor_ranking(hsl[i], skor_kata[i]) for i, value in enumerate(hsl)])
 
-        new = []
-        for i, value in enumerate(rank_skor):
-            new.append(ubah(rank_skor[i], token[i]))
+        new = tuple([ubah(rank_skor[i], token[i]) for i, value in enumerate(rank_skor)])
 
-        list_str = []
-        for i, value in enumerate(new):
-            list_str.append(to_str(new[i]))
+        list_str = tuple([to_str(new[i]) for i, value in enumerate(new)])
+        # for i, value in enumerate(new):
+        #     list_str.append(to_str(new[i]))
 
         rekomendasi = '. '.join([str(val) for val in list_str])
         # print(rekomendasi)
@@ -965,22 +866,6 @@ def proses_deteksi_koreksi():
         # return jsonify(rekomendasi)
 
         return render_template('user/hasil.html', jawaban=jawaban, rekomendasi=rekomendasi)
-
-def getJaroKamus():
-
-    # jobs = []
-    # for t in tokens:
-    #     p = multiprocessing.Process(target=jaro_kamus,
-    #                                 args=(t, hasilKamus, return_dict))
-    #     jobs.append(p)
-    #     p.start()
-    #
-    # for proc in jobs:
-    #     proc.join()
-    p = multiprocessing.Pool(2)
-    res = p.map(t, [1,2,4])
-    p.close()
-    return res
 
 @app.route('/hasil')
 @login_required
