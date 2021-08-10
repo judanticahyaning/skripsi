@@ -760,7 +760,7 @@ def deteksi_koreksi():
 @login_required
 def proses_deteksi_koreksi():
     if request.method == "POST":
-        start = process_time()
+        # start = process_time()
         # ambil nilai dari form html
         jawaban = request.form['jawaban']
 
@@ -811,8 +811,8 @@ def proses_deteksi_koreksi():
         r_unigram = tuple([list(row) for row in uni])
         # kata_uni = tuple([n for n in r_unigram if n[0][0] in depan_uni])
         muncul_uni = tuple([kemunculan_unigram(r_unigram, unigram[i]) for i, value in enumerate(unigram)])
-        end = process_time()
-        print(end - start)
+        # end = process_time()
+        # print(end - start)
         return jsonify("x")
 
         # bigram kiri
