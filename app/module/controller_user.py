@@ -1,18 +1,13 @@
-import math
-import multiprocessing
-
-from sqlalchemy.dialects.sqlite import json
-from sqlalchemy.orm import sessionmaker
 from app import app
+import math
 from flask import render_template, request, url_for, redirect
 from nltk.tokenize import sent_tokenize, word_tokenize
 import re
 from flask_login import login_required,current_user
 from flask import jsonify
-from .model import db, pertanyaan, kbbi, akun, kamus, unigram, bigram, trigram
+from .model import db, pertanyaan, kbbi, kamus, responden
 from sqlalchemy import literal, select
 from sqlalchemy import create_engine
-from .model import db, pertanyaan, kbbi, akun
 from math import floor
 from collections import namedtuple
 import pandas as pd
@@ -20,7 +15,6 @@ import json
 from operator import itemgetter
 import nltk
 nltk.download('stopwords')
-from Sastrawi.StopWordRemover.StopWordRemoverFactory import StopWordRemoverFactory, StopWordRemover, ArrayDictionary
 from itertools import groupby
 import threading
 import queue
@@ -750,25 +744,139 @@ def coba_jaro_kamus(q, token, hasil):
         result[j] = "_"
         # hsl.append(result)
     return q.put(result)
+
+@app.route('/daftar_pertanyaan')
+@login_required
+def daftar_pertanyaan():
+  # cur = mysql.connection.cursor()
+  # cur.execute("SELECT * FROM pertanyaan")
+  # data = cur.fetchall()
+  # cur.close()
+
+  # return render_template("daftar_pertanyaan.html", tanya = data)
+  listpertanyaan = pertanyaan.query.all()
+  return render_template("user/daftar_pertanyaan.html", tanya=listpertanyaan, user=current_user)
+
+@app.route('/tambah_pertanyaan', methods = ['POST'])
+@login_required
+def tambah_pertanyaan():
+  if request.method == "POST":
+    pertanyaans = request.form['pertanyaan']
+    kunci_jawaban =  request.form['kunci_jawaban']
+    # cur = mysql.connection.cursor()
+    # cur.execute("INSERT INTO pertanyaan(pertanyaan, kunci_jawaban) VALUES (%s, %s)", (pertanyaan, kunci_jawaban))
+    # mysql.connection.commit()
+    tambah = pertanyaan(pertanyaan=pertanyaans, kunci_jawaban=kunci_jawaban)
+    db.session.add(tambah)
+    db.session.commit()
+    return redirect(url_for('daftar_pertanyaan'))
+
+@app.route('/lihat_pertanyaan')
+@login_required
+def lihat_pertanyaan():
+  return redirect(url_for('daftar_pertanyaan'))
+
+@app.route('/edit_pertanyaan', methods = ['POST'])
+@login_required
+def edit_pertanyaan():
+  if request.method == "POST":
+    id_pertanyaan = request.form['id_pertanyaan']
+    new_edit_pertanyaan = request.form['edit_pertanyaan']
+    new_edit_kunci_jawaban = request.form['edit_kunci_jawaban']
+
+    # cur = mysql.connection.cursor()
+    # cur.execute("UPDATE pertanyaan SET pertanyaan=%s, kunci_jawaban=%s WHERE id_pertanyaan=%s", (edit_pertanyaan, edit_kunci_jawaban, id_pertanyaan))
+    # mysql.connection.commit()
+    edit = pertanyaan.query.filter_by(id_pertanyaan=id_pertanyaan).first()
+    edit.pertanyaan = new_edit_pertanyaan
+    edit.kunci_jawaban = new_edit_kunci_jawaban
+    db.session.commit()
+    return redirect(url_for('daftar_pertanyaan'))
+
+@app.route('/hapus_pertanyaan/<string:id_pertanyaan>', methods = ['POST','GET'])
+@login_required
+def hapus_pertanyaan(id_pertanyaan):
+  # cur = mysql.connection.cursor()
+  # cur.execute("DELETE FROM pertanyaan WHERE id_pertanyaan=%s", (id_pertanyaan,))
+  # mysql.connection.commit()
+  hapus = pertanyaan.query.filter_by(id_pertanyaan=id_pertanyaan).first()
+  db.session.delete(hapus)
+  db.session.commit()
+  return redirect(url_for('daftar_pertanyaan'))
+
+@app.route('/responden')
+@login_required
+def responden():
+    # list_responden = responden.query.all()
+    engine = create_engine("mysql+mysqlconnector://root@localhost:3306/tugas_akhir", echo=False)
+    list_responden = engine.execute("SELECT * FROM responden").fetchall()
+    list_jawaban = engine.execute(
+        "SELECT jawaban.id_jawaban, responden.nama, pertanyaan.pertanyaan, jawaban.jawaban, jawaban.rekomendasi, jawaban.nilai FROM jawaban "
+        "INNER JOIN responden ON responden.id=jawaban.id_responden "
+        "INNER JOIN pertanyaan ON pertanyaan.id_pertanyaan=jawaban.id_pertanyaan").fetchall()
+    return render_template('user/responden.html', list_responden=list_responden, list_jawaban=list_jawaban, user=current_user)
+
+@app.route('/tambah_responden', methods = ['POST'])
+@login_required
+def tambah_responden():
+  if request.method == "POST":
+    nama = request.form['nama']
+    jenis_kelamin =  request.form['optradio']
+    engine = create_engine("mysql+mysqlconnector://root@localhost:3306/tugas_akhir", echo=False)
+    sql = "INSERT INTO responden(nama, jenis_kelamin) VALUES (%s, %s)"
+    data = (nama, jenis_kelamin)
+    proses = engine.execute(sql,data)
+    return redirect(url_for('responden'))
+
+@app.route('/lihat_responden')
+@login_required
+def lihat_responden():
+  return redirect(url_for('responden'))
+
+@app.route('/edit_responden', methods = ['POST'])
+@login_required
+def edit_responden():
+  if request.method == "POST":
+    id = request.form['id']
+    new_nama = request.form['edit_nama']
+    new_jenis_kelamin = request.form['optradio']
+    engine = create_engine("mysql+mysqlconnector://root@localhost:3306/tugas_akhir", echo=False)
+    sql = engine.execute("UPDATE responden SET nama=%s, jenis_kelamin=%s WHERE id=%s",(new_nama, new_jenis_kelamin, id))
+    return redirect(url_for('responden'))
+
+@app.route('/hapus_responden/<string:id>', methods = ['POST','GET'])
+@login_required
+def hapus_responden(id):
+  engine = create_engine("mysql+mysqlconnector://root@localhost:3306/tugas_akhir", echo=False)
+  sql = engine.execute("DELETE FROM responden WHERE id="+id)
+  return redirect(url_for('responden'))
+
 @app.route('/deteksi_koreksi')
 @login_required
 def deteksi_koreksi():
+    engine = create_engine("mysql+mysqlconnector://root@localhost:3306/tugas_akhir", echo=False)
+    list_responden = engine.execute("SELECT * FROM responden").fetchall()
     listpertanyaan = pertanyaan.query.all()
-    return render_template('user/deteksi_koreksi.html', tanya=listpertanyaan,user=current_user)
+    return render_template('user/deteksi_koreksi.html', tanya=listpertanyaan, list_responden=list_responden, user=current_user)
 
 @app.route('/proses_deteksi_koreksi', methods = ['POST'])
 @login_required
 def proses_deteksi_koreksi():
     if request.method == "POST":
-        # start = process_time()
+        start = process_time()
         # ambil nilai dari form html
         jawaban = request.form['jawaban']
 
-        # simpan nilai utk scoring
-        # pertanyaan = request.form['pertanyaan']
+        responden = request.form['responden']
         engine = create_engine("mysql+mysqlconnector://root@localhost:3306/tugas_akhir", echo=False)
-        # sql = engine.execute("SELECT kunci_jawaban FROM pertanyaan WHERE id_pertanyaan=" + pertanyaan).fetchall()
-        # kunci = tuple([row[0] for row in sql])
+        nama = engine.execute("SELECT * FROM responden WHERE id=" + responden).fetchall()
+        # respon = tuple([row[0] for row in query])
+
+        # simpan nilai utk scoring
+        pertanyaan = request.form['pertanyaan']
+        sql = engine.execute("SELECT kunci_jawaban FROM pertanyaan WHERE id_pertanyaan=" + pertanyaan).fetchall()
+        tanya = engine.execute("SELECT * FROM pertanyaan WHERE id_pertanyaan=" + pertanyaan).fetchall()
+        kunci = tuple([row[0] for row in sql])
 
         # preprocessing
         jawaban = jawaban.lower()
@@ -793,43 +901,40 @@ def proses_deteksi_koreksi():
         trigram = tuple([buat_trigram(token[i], hsl[i]) for i, value in enumerate(token)])
 
         # # merge
-        # merge_uni = satu_dimensi_token(unigram)
-        # merge_kiri = satu_dimensi_token(bigram_kiri)
-        # merge_kanan = satu_dimensi_token(bigram_kanan)
-        # merge_trigram = satu_dimensi_token(trigram)
+        merge_uni = satu_dimensi_token(unigram)
+        merge_kiri = satu_dimensi_token(bigram_kiri)
+        merge_kanan = satu_dimensi_token(bigram_kanan)
+        merge_trigram = satu_dimensi_token(trigram)
         # hapus underscore uni
-        # merge_uni_new = [x[0] for x in merge_uni if not x[0] == "_"]
+        merge_uni_new = [x[0] for x in merge_uni if not x[0] == "_"]
 
         # mencari kata depan masing2 (uni masih blm bisa kata depan)
-        # depan_uni = huruf_depan(merge_uni_new)
-        # depan_kiri = huruf_depan(merge_kiri)
-        # depan_kanan = huruf_depan(merge_kanan)
-        # depan_trigram = huruf_depan(merge_trigram)
+        depan_uni = huruf_depan(merge_uni_new)
+        depan_kiri = huruf_depan(merge_kiri)
+        depan_kanan = huruf_depan(merge_kanan)
+        depan_trigram = huruf_depan(merge_trigram)
 
         # hitung jumlah kemunculan masing-masing n-gram
         uni = engine.execute("SELECT unigram, CAST(SUM(jumlah_kemunculan) AS int) FROM unigram GROUP BY unigram")
         r_unigram = tuple([list(row) for row in uni])
-        # kata_uni = tuple([n for n in r_unigram if n[0][0] in depan_uni])
-        muncul_uni = tuple([kemunculan_unigram(r_unigram, unigram[i]) for i, value in enumerate(unigram)])
-        # end = process_time()
-        # print(end - start)
-        return jsonify("x")
+        kata_uni = tuple([n for n in r_unigram if n[0][0] in depan_uni])
+        muncul_uni = tuple([kemunculan_unigram(kata_uni, unigram[i]) for i, value in enumerate(unigram)])
 
         # bigram kiri
         kiri = engine.execute("SELECT bigram, CAST(SUM(jumlah_kemunculan) AS int) FROM bigram GROUP BY bigram")
         r_bigram_kiri = tuple([list(row) for row in kiri])
-        # kata_kiri = tuple([n for n in r_bigram_kiri if n[0][0] in depan_kiri])
-        muncul_kiri = tuple([kemunculan_bigram_kiri(r_bigram_kiri,bigram_kiri[i]) for i, value in enumerate(bigram_kiri)])
+        kata_kiri = tuple([n for n in r_bigram_kiri if n[0][0] in depan_kiri])
+        muncul_kiri = tuple([kemunculan_bigram_kiri(kata_kiri,bigram_kiri[i]) for i, value in enumerate(bigram_kiri)])
 
         # bigram kanan
-        # kata_kanan = tuple([n for n in r_bigram_kiri if n[0][0] in depan_kanan])
-        muncul_kanan = tuple([kemunculan_bigram_kanan(r_bigram_kiri, bigram_kanan[i]) for i, value in enumerate(bigram_kanan)])
+        kata_kanan = tuple([n for n in r_bigram_kiri if n[0][0] in depan_kanan])
+        muncul_kanan = tuple([kemunculan_bigram_kanan(kata_kanan, bigram_kanan[i]) for i, value in enumerate(bigram_kanan)])
 
         # trigram
         tri = engine.execute("SELECT trigram, CAST(SUM(jumlah_kemunculan) AS int) FROM trigram GROUP BY trigram")
         r_trigram = tuple([list(row) for row in tri])
-        # kata_tri = tuple([n for n in r_trigram if n[0][0] in depan_trigram])
-        muncul_tri = tuple([kemunculan_trigram(r_trigram, trigram[i]) for i, value in enumerate(trigram)])
+        kata_tri = tuple([n for n in r_trigram if n[0][0] in depan_trigram])
+        muncul_tri = tuple([kemunculan_trigram(kata_tri, trigram[i]) for i, value in enumerate(trigram)])
 
         # hitung total kemunculan
         tot_unigram = tuple([total_unigram(hsl[i], unigram[i]) for i, value in enumerate(unigram)])
@@ -857,20 +962,35 @@ def proses_deteksi_koreksi():
         new = tuple([ubah(rank_skor[i], token[i]) for i, value in enumerate(rank_skor)])
 
         list_str = tuple([to_str(new[i]) for i, value in enumerate(new)])
-        # for i, value in enumerate(new):
-        #     list_str.append(to_str(new[i]))
 
         rekomendasi = '. '.join([str(val) for val in list_str])
-        # print(rekomendasi)
-        # penilaian = nilai(rekomendasi, kunci)
+        penilaian = nilai(rekomendasi, kunci)
         # return jsonify(rekomendasi)
+        end = process_time()
+        print(end - start)
+        # return jsonify("x")
 
-        return render_template('user/hasil.html', jawaban=jawaban, rekomendasi=rekomendasi)
+        return render_template('user/hasil.html', penilaian=penilaian, jawaban=jawaban, rekomendasi=rekomendasi, nama=nama,  tanya=tanya)
 
 @app.route('/hasil')
 @login_required
 def hasil():
   return render_template('user/hasil.html', user=current_user)
+
+@app.route('/simpan_hasil', methods = ['POST'])
+@login_required
+def simpan_hasil():
+    if request.method == "POST":
+        responden = request.form['id']
+        pertanyaan = request.form['id_tanya']
+        jawaban = request.form['jawaban']
+        rekomendasi = request.form['rekomendasi']
+        nilai = request.form['nilai']
+        engine = create_engine("mysql+mysqlconnector://root@localhost:3306/tugas_akhir", echo=False)
+        sql = "INSERT INTO jawaban(id_responden, id_pertanyaan, jawaban, rekomendasi, nilai) VALUES (%s, %s, %s, %s, %s)"
+        data = (responden, pertanyaan, jawaban, rekomendasi, nilai)
+        proses = engine.execute(sql, data)
+        return redirect('deteksi_koreksi')
 
 @app.route('/tentang_user')
 @login_required
@@ -980,10 +1100,13 @@ def nilai (rekomendasi, kunci):
         if (index == len(kali_bobot) - 1):
             list_total.append(total)
 
+
     # similaritas + konversi nilai
     for total, kunci, jawab in zip(list_total, list_jarak_kunci, list_jarak_jawab):
         similaritas = total / (kunci * jawab)
-        if (similaritas >= 0.01 and similaritas <= 0.10):
+        if (similaritas == 0):
+            value=0
+        elif (similaritas >= 0.01 and similaritas <= 0.10):
             value = 10
         elif (similaritas >= 0.11 and similaritas <= 0.20):
             value = 20
@@ -1005,119 +1128,3 @@ def nilai (rekomendasi, kunci):
             value = 100
     return value
 
-@app.route('/proses_coba_penilaian', methods = ['POST'])
-@login_required
-def proses_coba_penilaian():
-    if request.method == "POST":
-        # ambil nilai dari form html
-        pertanyaan = request.form['pertanyaan']
-        jawab_old = request.form['jawab']
-        engine = create_engine("mysql+mysqlconnector://root@localhost:3306/tugas_akhir", echo=False)
-        sql = engine.execute("SELECT kunci_jawaban FROM pertanyaan WHERE id_pertanyaan="+pertanyaan).fetchall()
-        kunci = [row[0] for row in sql]
-        n = len([kunci, jawab_old])
-
-        # case folding
-        jawaban = jawab_old.lower()
-        for i in kunci:
-            kunci = i.lower()
-
-        prepro_kunci = prepro_scoring(kunci)
-        prepro_jawaban = prepro_scoring(jawaban)
-
-        # menggabungkan + isi default 0
-        set_kata = set(prepro_kunci).union(set(prepro_jawaban))
-        katadictkunci = dict.fromkeys(set_kata, 0)
-        katadictjawaban = dict.fromkeys(set_kata, 0)
-
-        # jika term terdapat di dokumen beri nilai 1, jika tidak beri nilai 0
-        for i in prepro_kunci:
-            katadictkunci[i] = 1
-        for kata in prepro_jawaban:
-            katadictjawaban[kata] = 1
-
-        # hitung df
-        df = {}
-        for key, value in katadictkunci.items():
-            if key in df:
-                df[key] += value
-            else:
-                df[key] = value
-
-        for key, value in katadictjawaban.items():
-            if key in df:
-                df[key] += value
-            else:
-                df[key] = value
-
-        # hitung idfi
-        idfi = {}
-        for key, value in df.items():
-            idfi[key] = math.log10(n/value)+1
-
-        # hitung bobot
-        bobot_kunci = {}
-        for key, value in katadictkunci.items():
-            if key in idfi:
-                bobot_kunci[key] = value * idfi[key]
-
-        bobot_jawab = {}
-        for key, value in katadictjawaban.items():
-            #     print(key, value)
-            if key in idfi:
-                bobot_jawab[key] = value * idfi[key]
-
-        # hitung jarak
-        list_jarak_kunci = []
-        jarak = 0
-        for index, (key, value) in enumerate(bobot_kunci.items()):
-            jarak += pow(value, 2)
-            print(index, value, jarak)
-            if (index == len(bobot_kunci) - 1):
-                hasil = math.sqrt(jarak)
-                list_jarak_kunci.append(hasil)
-
-        list_jarak_jawab = []
-        jarak = 0
-        for index, (key, value) in enumerate(bobot_jawab.items()):
-            jarak += pow(value, 2)
-            print(value, jarak)
-            if (index == len(bobot_jawab) - 1):
-                hasil = math.sqrt(jarak)
-                list_jarak_jawab.append(hasil)
-
-        # kunci*jawab
-        list_total = []
-        total = 0
-        kali_bobot = {key: value * bobot_jawab[key] for key, value in bobot_kunci.items()}
-        for index, (key, value) in enumerate(kali_bobot.items()):
-            total += value
-            if (index == len(kali_bobot) - 1):
-                list_total.append(total)
-
-        # similaritas + konversi nilai
-        for total, kunci, jawab in zip(list_total, list_jarak_kunci, list_jarak_jawab):
-            similaritas = total / (kunci * jawab)
-            if (similaritas >= 0.01 and similaritas <= 0.10):
-                value = 10
-            elif (similaritas >= 0.11 and similaritas <= 0.20):
-                value = 20
-            elif (similaritas >= 0.21 and similaritas <= 0.30):
-                value = 30
-            elif (similaritas >= 0.31 and similaritas <= 0.40):
-                value = 40
-            elif (similaritas >= 0.41 and similaritas <= 0.50):
-                value = 50
-            elif (similaritas >= 0.51 and similaritas <= 0.60):
-                value = 60
-            elif (similaritas >= 0.61 and similaritas <= 0.70):
-                value = 70
-            elif (similaritas >= 0.71 and similaritas <= 0.80):
-                value = 80
-            elif (similaritas >= 0.81 and similaritas <= 0.90):
-                value = 90
-            else:
-                value = 100
-
-    # return jsonify(similaritas)
-    return render_template('user/deteksi_koreksi.html', similaritas=similaritas, jawaban=jawab_old, value=value)

@@ -13,39 +13,57 @@
                     </div>
                 </div>
             </div>
+            <form action="{{ url_for('simpan_hasil') }}" method="post">
             <div class="card-box mb-30">
                 <div class="pd-20">
-<!--                    <div class="form-group">-->
-<!--                        <label><b>Pertanyaan</b></label>-->
-<!--                        <input name="sebelum_deteksi" id="sebelum_deteksi"  class="form-control" required value="{{pertanyaan}}">-->
-<!--                    </div>-->
-<!--                    <div class="form-group">-->
-<!--                        <label><b>Sebelum Deteksi dan Koreksi</b></label>-->
-<!--                        <textarea name="sebelum_deteksi" id="sebelum_deteksi"  class="form-control" required >{{jawaban}}</textarea>-->
-<!--                    </div>-->
-<!--                    <div class="form-group">-->
-<!--                        <label><b>Setelah Deteksi dan Koreksi</b></label>-->
-<!--                        <textarea name="setelah_deteksi" id="setelah_deteksi"  class="form-control" required >{{rekomendasi}}</textarea>-->
-<!--                    </div>-->
-<!--                    <div class="form-group">-->
-<!--                        <label><b>Nilai Esai</b></label>-->
-<!--                        <textarea name="nilai" id="nilai"  class="form-control" required >{{value}}</textarea>-->
-<!--                    </div>-->
-                        <label><b>Sebelum Deteksi dan Koreksi</b></label>
-                        <p id="sebelum">{{jawaban}}</p>
-                        <label><b>Setelah Deteksi dan Koreksi</b></label>
-                        <p id="setelah" onchange="proses_highlight()">{{rekomendasi}}</p>
-                    <div >
-                        <label><b>Ranking Rekomendasi Kata</b></label>
-                        <p id="ranking" >{{rank}}</p>
+                    <h5>Nama Responden dan Pertanyaan</h5>
+                    <hr>
+                    <div class="form-group">
+                        <label><b>Nama Responden</b></label>
+                        {% for row in nama %}
+                        <input type="hidden" name="id" id="id"  class="form-control" required value="{{row.id}}">
+                        <input name="responden" id="responden"  class="form-control" required value="{{row.nama}}">
+                        {% endfor %}
                     </div>
                     <div class="form-group">
-                        <label><b>Nilai Esai</b></label>
-<!--                        <textarea name="nilai" id="nilai"  class="form-control" required >{{value}}</textarea>-->
-                        <p>{{penilaian}}</p>
+                        <label><b>Pertanyaan</b></label>
+                        {% for row in tanya %}
+                        <input type="hidden" name="id_tanya" id="id_tanya"  class="form-control" required value="{{row.id_pertanyaan}}">
+                        <input name="pertanyaan" id="pertanyaan"  class="form-control" required value="{{row.pertanyaan}}">
+                        {% endfor %}
                     </div>
                 </div>
             </div>
+            <div class="card-box mb-30">
+                <div class="pd-20">
+                    <h5>Hasil Deteksi dan Koreksi</h5>
+                    <hr>
+                    <div class="pb-20">
+                        <label><b>Sebelum Deteksi dan Koreksi</b></label>
+                        <input type="hidden" name="jawaban" id="jawaban"  class="form-control" required value="{{jawaban}}">
+                        <p id="sebelum">{{jawaban}}</p>
+                        <label><b>Setelah Deteksi dan Koreksi</b></label>
+                        <input type="hidden" name="rekomendasi" id="rekomendasi"  class="form-control" required value="{{rekomendasi}}">
+                        <p id="setelah" onchange="proses_highlight()">{{rekomendasi}}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="card-box mb-30">
+                <div class="pd-20">
+                    <h5>Hasil Penilaian</h5>
+                    <hr>
+                    <div class="pb-20">
+                        <div class="form-group">
+                            <label><b>Nilai Esai</b></label>
+                            <input name="nilai" id="nilai" class="form-control" value="{{penilaian}}">
+                        </div>
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-primary">Simpan</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            </form>
         </div>
     </div>
 </div>

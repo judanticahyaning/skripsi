@@ -52,6 +52,16 @@ class trigram(db.Model):
         self.trigram = trigram
         self.jumlah_kemunculan = jumlah_kemunculan
 
+class responden(db.Model):
+    id = db.Column(db.Integer, unique=True, primary_key=True, nullable=False)
+    nama = db.Column(db.String(50), nullable=False)
+    jenis_kelamin = db.Column(db.String(50), nullable=False)
+
+    def __repr__(self, id, nama, jenis_kelamin):
+        self.id = id
+        self.nama = nama
+        self.jenis_kelamin = jenis_kelamin
+
 class akun(db.Model, UserMixin):
     id = db.Column(db.Integer, unique=True, primary_key=True, nullable=False)
     nama = db.Column(db.String(512), nullable=False)
@@ -73,3 +83,6 @@ class kamus(db.Model):
     def __repr__(self, id, kata):
         self.id = id
         self.kata = kata
+
+db.create_all()
+

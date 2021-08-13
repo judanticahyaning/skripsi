@@ -18,6 +18,16 @@
 					<div class="pd-20">
 						<form action="{{ url_for('proses_deteksi_koreksi') }}" method="post">
 							<div class="form-group">
+								<b><label>Responden</label></b>
+								<select class="form-control" name="responden">
+									<option>Pilih Responden</option>
+									{% for row in list_responden %}
+										<option value="{{row.id}}">{{row.nama}}</option>
+									{% endfor %}
+								</select>
+							</div>
+							<div class="form-group">
+								<b><label>Pertanyaan</label></b>
 								<select class="form-control" name="pertanyaan">
 									<option>Pilih Pertanyaan</option>
 									{% for row in tanya %}
@@ -26,46 +36,16 @@
 								</select>
 							</div>
 							<div class="form-group">
-								<label>Jawaban</label>
+								<b><label>Jawaban</label></b>
 								<textarea name="jawaban" id="jawaban" class="form-control" required placeholder="Isi Jawabanmu Disini" >{{jawaban}}</textarea>
 							</div>
 							<div class="form-group">
-								<button type="submit" class="btn btn-primary">Coba Deteksi Penulisan</button>
+								<button type="submit" class="btn btn-primary">Proses</button>
 							</div>
 						</form>
 					</div>
 				</div>
-				<div class="card-box mb-30">
-					<div class="pd-20">
-						<form action="{{ url_for('proses_coba_penilaian') }}" method="post">
-							<div class="form-group">
-								<label>Pilih Pertanyaan</label>
-							</div>
-							<div class="form-group">
-								<select class="form-control" name="pertanyaan">
-									<option>Pilih Pertanyaan</option>
-									{% for row in tanya %}
-										<option value="{{row.id_pertanyaan}}">{{row.pertanyaan}}</option>
-									{% endfor %}
-								</select>
-							</div>
-							<div class="form-group">
-									<label>Jawaban</label>
-									<textarea name="jawab" id="jawab" class="form-control" value = "{{jawaban}}" required placeholder="Isi Jawabanmu Disini" ></textarea>
-							</div>
-							<div class="form-group">
-								<button type="submit" class="btn btn-primary">Coba Penilaian</button>
-							</div>
-						</form>
-					</div>
-				</div>
-				<div class="card-box mb-30">
-					<div class="pd-20">
-						{{jawaban}}
-						{{similaritas}}
-						{{value}}
-					</div>
-				</div>
+
 			</div>
 		</div>
 </div>

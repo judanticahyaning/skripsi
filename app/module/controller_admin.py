@@ -28,65 +28,6 @@ def kamus_kata():
   return render_template("admin/kamus_kata.html", kata=listkata, admin=current_user)
   # return render_template("kamus_kata.html")
 
-@app.route('/daftar_pertanyaan')
-@login_required
-def daftar_pertanyaan():
-  # cur = mysql.connection.cursor()
-  # cur.execute("SELECT * FROM pertanyaan")
-  # data = cur.fetchall()
-  # cur.close()
-
-  # return render_template("daftar_pertanyaan.html", tanya = data)
-  listpertanyaan = pertanyaan.query.all()
-  return render_template("admin/daftar_pertanyaan.html", tanya=listpertanyaan, admin=current_user)
-
-@app.route('/tambah_pertanyaan', methods = ['POST'])
-@login_required
-def tambah_pertanyaan():
-  if request.method == "POST":
-    pertanyaans = request.form['pertanyaan']
-    kunci_jawaban =  request.form['kunci_jawaban']
-    # cur = mysql.connection.cursor()
-    # cur.execute("INSERT INTO pertanyaan(pertanyaan, kunci_jawaban) VALUES (%s, %s)", (pertanyaan, kunci_jawaban))
-    # mysql.connection.commit()
-    tambah = pertanyaan(pertanyaan=pertanyaans, kunci_jawaban=kunci_jawaban)
-    db.session.add(tambah)
-    db.session.commit()
-    return redirect(url_for('daftar_pertanyaan'))
-
-@app.route('/lihat_pertanyaan')
-@login_required
-def lihat_pertanyaan():
-  return redirect(url_for('admin/daftar_pertanyaan'))
-
-@app.route('/edit_pertanyaan', methods = ['POST'])
-@login_required
-def edit_pertanyaan():
-  if request.method == "POST":
-    id_pertanyaan = request.form['id_pertanyaan']
-    new_edit_pertanyaan = request.form['edit_pertanyaan']
-    new_edit_kunci_jawaban = request.form['edit_kunci_jawaban']
-
-    # cur = mysql.connection.cursor()
-    # cur.execute("UPDATE pertanyaan SET pertanyaan=%s, kunci_jawaban=%s WHERE id_pertanyaan=%s", (edit_pertanyaan, edit_kunci_jawaban, id_pertanyaan))
-    # mysql.connection.commit()
-    edit = pertanyaan.query.filter_by(id_pertanyaan=id_pertanyaan).first()
-    edit.pertanyaan = new_edit_pertanyaan
-    edit.kunci_jawaban = new_edit_kunci_jawaban
-    db.session.commit()
-    return redirect(url_for('daftar_pertanyaan'))
-
-@app.route('/hapus_pertanyaan/<string:id_pertanyaan>', methods = ['POST','GET'])
-@login_required
-def hapus_pertanyaan(id_pertanyaan):
-  # cur = mysql.connection.cursor()
-  # cur.execute("DELETE FROM pertanyaan WHERE id_pertanyaan=%s", (id_pertanyaan,))
-  # mysql.connection.commit()
-  hapus = pertanyaan.query.filter_by(id_pertanyaan=id_pertanyaan).first()
-  db.session.delete(hapus)
-  db.session.commit()
-  return redirect(url_for('daftar_pertanyaan'))
-
 @app.route('/korpus_ngram')
 @login_required
 def korpus_ngram():
