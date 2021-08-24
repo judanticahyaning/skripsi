@@ -1,0 +1,282 @@
+{% include "admin/header.html" %}
+{% include "admin/navbar.html" %}
+{% include "admin/sidebar.html" %}
+
+    <div class="main-container">
+		<div class="pd-ltr-20 xs-pd-20-10">
+			<div class="min-height-200px">
+                <div class="page-header">
+					<div class="row">
+						<div class="col-md-6 col-sm-12">
+							<div class="title">
+								<h4>Responden</h4>
+							</div>
+						</div>
+<!--						<div class="col-md-6 col-sm-12 text-right">-->
+<!--							<button id="showModal" class="btn btn-warning btn-round ml-auto" data-toggle="modal" data-target="#tambahResponden">-->
+<!--                            <i class="fa fa-plus"></i>-->
+<!--                            Tambah Responden-->
+<!--                            </button>-->
+<!--						</div>-->
+					</div>
+				</div>
+				<!-- Simple Datatable start -->
+				<div class="card-box mb-30">
+					<div class="pd-20">
+                        <h5>Daftar Responden</h5>
+                        <hr>
+					</div>
+                    <!-- Modal -->
+<!--                    <div class="modal fade" id="tambahResponden" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">-->
+<!--                          <div class="modal-dialog">-->
+<!--                              <div class="modal-content">-->
+<!--                                  <div class="modal-header">-->
+<!--                                    <h5 class="modal-title" id="staticBackdropLabel">Tambah Responden</h5>-->
+<!--                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">-->
+<!--                                      <span aria-hidden="true">&times;</span>-->
+<!--                                    </button>-->
+<!--                                  </div>-->
+<!--                              <div class="modal-body">-->
+<!--                                  <form action="{{url_for('tambah_responden')}}" method="post">-->
+<!--                                      <div class="form-group">-->
+<!--                                          <b><label>Nama Lengkap</label></b>-->
+<!--                                          <input type="text" name="nama" id="nama" class="form-control" required placeholder="Isi Namamu Disini" >-->
+<!--&lt;!&ndash;                                          <textarea name="nama" id="nama" class="form-control" required placeholder="Isi Namamu Disini" ></textarea>&ndash;&gt;-->
+<!--                                      </div>-->
+<!--                                      <div class="form-group">-->
+<!--                                          <b><label>Jenis kelamin</label></b><br>-->
+<!--                                          <div class="form-check">-->
+<!--                                              <label class="form-check-label">-->
+<!--                                                <input type="radio" class="form-check-input" name="optradio" value="Laki">Laki-laki-->
+<!--                                              </label>-->
+<!--                                          </div>-->
+<!--                                          <div class="form-check">-->
+<!--                                              <label class="form-check-label">-->
+<!--                                                <input type="radio" class="form-check-input" name="optradio" value="Perempuan">Perempuan-->
+<!--                                              </label>-->
+<!--                                          </div>-->
+<!--                                      </div>-->
+<!--                                      <div class="modal-footer">-->
+<!--                                        <button type="submit" class="btn btn-primary">Tambah</button>-->
+<!--                                        <button type="button" class="btn btn-danger" data-dismiss="modal">Keluar</button>-->
+<!--                                      </div>-->
+<!--                                  </form>-->
+<!--                              </div>-->
+<!--                              </div>-->
+<!--                          </div>-->
+<!--                      </div>-->
+					<div class="pb-20">
+						<table class="display table table-striped table-hover" cellspacing="0" width="100%" id="coba">
+							<thead>
+								<tr>
+									<th>No</th>
+                                    <th>Nama Lengkap</th>
+                                    <th>Nama Pengguna</th>
+                                    <th>Jenis Kelamin</th>
+									<th class="datatable-nosort">Action</th>
+								</tr>
+							</thead>
+							<tbody>
+								{% for row in list_responden %}
+								<tr>
+									<td>{{row.id}}</td>
+									<td>{{row.nama}}</td>
+                                    <td>{{row.username}}</td>
+                                    <td>{{row.jenis_kelamin}}</td>
+                                    <td>
+										<div class="dropdown">
+											<a class="btn btn-link font-24 p-0 line-height-1 no-arrow dropdown-toggle" href="#" role="button" data-toggle="dropdown">
+												<i class="dw dw-more"></i>
+											</a>
+											<div class="dropdown-menu dropdown-menu-right dropdown-menu-icon-list">
+												<a class="dropdown-item" href="/lihat_responden/{{row.id}}" data-toggle="modal" data-target="#lihatResponden{{row.id}}"><i class="dw dw-eye"></i>Lihat</a>
+<!--												<a class="dropdown-item" href="/edit_responden/{{row.id}}" data-toggle="modal" data-target="#editResponden{{row.id}}"><i class="dw dw-edit2"></i>Edit</a>-->
+<!--												<a class="dropdown-item" href="/hapus_responden/{{row.id}}"><i class="dw dw-delete-3"></i>Hapus</a>-->
+											</div>
+										</div>
+									</td>
+								</tr>
+<!--                            modal view-->
+                                <div class="modal fade" id="lihatResponden{{row.id}}" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">-->
+                                <div class="modal-dialog">
+                                  <div class="modal-content">
+                                      <div class="modal-header">
+                                        <h5 class="modal-title" id="staticBackdropLabel">Lihat Responden</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                          <span aria-hidden="true">&times;</span>
+                                        </button>
+                                      </div>
+                                  <div class="modal-body">
+                                      <form action="" method="post">
+                                          <div class="form-group">
+                                              <b><label>Nama Lengkap</label></b>
+                                              <input type="hidden" name="id" id="id" class="form-control" value="{{row.id}}" >
+                                              <input type="text" name="lihat_nama" id="lihat_nama" class="form-control" value="{{row.nama}}" >
+                                          </div>
+                                          <div class="form-group">
+                                              <b><label>Nama Pengguna</label></b>
+                                              <input type="text" name="lihat_user" id="lihat_user" class="form-control" value="{{row.username}}" >
+                                          </div>
+                                          <div class="form-group">
+                                              <b><label>Jenis kelamin</label></b><br>
+                                              <div class="form-check">
+                                                  {% if row.jenis_kelamin == "Laki": %}
+                                                  <label class="form-check-label">
+                                                    <input type="radio" class="form-check-input" name="laki" value="{{row.jenis_kelamin}}" checked >Laki-laki <br>
+                                                    <input type="radio" class="form-check-input" name="pr" value="{{row.jenis_kelamin}}" >Perempuan
+                                                  </label>
+                                                  {% endif%}
+                                              </div>
+                                              <div class="form-check">
+                                                  {% if row.jenis_kelamin == "Perempuan": %}
+                                                  <label class="form-check-label">
+                                                    <input type="radio" class="form-check-input" name="laki" value="{{row.jenis_kelamin}}"  >Laki-laki <br>
+                                                    <input type="radio" class="form-check-input" name="pr" value="{{row.jenis_kelamin}}" checked>Perempuan
+                                                  </label>
+                                                  {% endif%}
+                                              </div>
+                                        </div>
+                                          <div class="modal-footer">
+                                            <button type="button" class="btn btn-danger" data-dismiss="modal">Keluar</button>
+                                          </div>
+                                      </form>
+                                  </div>
+                                  </div>
+                              </div>
+                            </div>
+<!--                            modal edit    -->
+<!--                                <div class="modal fade" id="editResponden{{row.id}}" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">&ndash;&gt;-->
+<!--                                <div class="modal-dialog">-->
+<!--                                  <div class="modal-content">-->
+<!--                                      <div class="modal-header">-->
+<!--                                        <h5 class="modal-title" id="staticBackdropLabel">Edit Responden</h5>-->
+<!--                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">-->
+<!--                                          <span aria-hidden="true">&times;</span>-->
+<!--                                        </button>-->
+<!--                                      </div>-->
+<!--                                  <div class="modal-body">-->
+<!--                                      <form action="{{ url_for('edit_responden') }}" method="post">-->
+<!--                                          <div class="form-group">-->
+<!--                                              <b><label>Nama Lengkap</label></b>-->
+<!--                                              <input type="hidden" name="id" id="id" class="form-control" value="{{row.id}}" >-->
+<!--                                              <input type="text" name="edit_nama" id="edit_nama" class="form-control" value="{{row.nama}}" >-->
+<!--                                          </div>-->
+<!--                                          <div class="form-group">-->
+<!--                                              <b><label>Jenis kelamin</label></b><br>-->
+<!--                                              <div class="form-check">-->
+<!--                                                  <label class="form-check-label">-->
+<!--                                                  {% if row.jenis_kelamin == "Laki": %}-->
+<!--                                                    <input type="radio" class="form-check-input" name="optradio" value="Laki-laki" checked >Laki-laki <br>-->
+<!--                                                    <input type="radio" class="form-check-input" name="optradio" value="Perempuan" >Perempuan-->
+<!--                                                  {% else: %}-->
+<!--                                                    <input type="radio" class="form-check-input" name="optradio" value="Laki-laki"  >Laki-laki <br>-->
+<!--                                                    <input type="radio" class="form-check-input" name="optradio" value="Perempuan" checked>Perempuan-->
+<!--                                                  {% endif%}-->
+<!--                                                  </label>-->
+<!--                                              </div>-->
+<!--                                          </div>-->
+<!--                                          <div class="modal-footer">-->
+<!--                                            <button type="submit" class="btn btn-primary">Edit</button>-->
+<!--                                            <button type="button" class="btn btn-danger" data-dismiss="modal">Keluar</button>-->
+<!--                                          </div>-->
+<!--                                      </form>-->
+<!--                                  </div>-->
+<!--                                  </div>-->
+<!--                              </div>-->
+<!--                            </div>-->
+								{% endfor %}
+							</tbody>
+						</table>
+					</div>
+				</div>
+                <div class="card-box mb-30">
+					<div class="pd-20">
+                        <h5>Daftar Jawaban Responden</h5>
+                        <hr>
+					</div>
+                    <div class="pb-20">
+						<table class="display table table-striped table-hover" cellspacing="0" width="100%" id="bigram">
+							<thead>
+                            	<tr>
+									<th>No</th>
+                                    <th>Nama Responden</th>
+                                    <th>Pertanyaan</th>
+                                    <th>Jawaban</th>
+                                    <th>Rekomendasi</th>
+                                    <th>Nilai</th>
+                                    <th>Action</th>
+								</tr>
+                            </thead>
+							<tbody>
+								{% for row in list_jawaban %}
+							    <tr>
+									<td>{{row.id_jawaban}}</td>
+                                    <td>{{row.nama}}</td>
+									<td>{{row.pertanyaan}}</td>
+                                    <td>{{row.jawaban}}</td>
+                                    <td>{{row.rekomendasi}}</td>
+                                    <td>{{row.nilai}}</td>
+                                    <td>
+                                        <div class="dropdown">
+											<a class="btn btn-link font-24 p-0 line-height-1 no-arrow dropdown-toggle" href="#" role="button" data-toggle="dropdown">
+												<i class="dw dw-more"></i>
+											</a>
+											<div class="dropdown-menu dropdown-menu-right dropdown-menu-icon-list">
+                                                <a class="dropdown-item" href="/lihat_responden/{{row.id_jawaban}}" data-toggle="modal" data-target="#hasil{{row.id_jawaban}}"><i class="dw dw-eye"></i>Lihat</a>
+                                            </div>
+                                        </div>
+                                    </td>
+								</tr>
+<!--                                modal view-->
+                                <div class="modal fade" id="hasil{{row.id_jawaban}}" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">-->
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                          <div class="modal-header">
+                                            <h5 class="modal-title" id="staticBackdropLabel">Lihat Jawaban</h5>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                              <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body">
+                                          <form action="" method="post">
+                                              <div class="form-group">
+                                                  <b><label>Responden</label></b>
+                                                  <input type="text" name="responden" id="responden" class="form-control" value="{{row.nama}}" >
+                                              </div>
+                                              <div class="form-group">
+                                                  <b><label>Pertanyaan</label></b>
+                                                  <input type="text" name="pertanyaan" id="pertanyaan" class="form-control" value="{{row.pertanyaan}}" >
+                                              </div>
+                                              <div class="form-group">
+                                                  <b><label>Jawaban</label></b>
+                                                  <textarea name="jawaban" id="jawaban" class="form-control" >{{row.jawaban}}</textarea>
+                                              </div>
+                                              <div class="form-group">
+                                                  <b><label>Rekomendasi</label></b>
+                                                  <textarea name="rekomendasi" id="rekomendasi" class="form-control" >{{row.rekomendasi}}</textarea>
+                                              </div>
+                                              <div class="form-group">
+                                                  <b><label>Nilai</label></b>
+                                                  <input type="text" name="nilai" id="nilai" class="form-control" value="{{row.nilai}}" >
+                                              </div>
+                                              <div class="modal-footer">
+                                                <button type="button" class="btn btn-danger" data-dismiss="modal">Keluar</button>
+                                              </div>
+                                          </form>
+                                        </div>
+                                    </div>
+                                </div>
+                                </div>
+                                {% endfor %}
+							</tbody>
+						</table>
+					</div>
+                </div>
+
+				<!-- Simple Datatable End -->
+				<!-- multiple select row Datatable start -->
+			</div>
+		</div>
+    </div>
+
+{% include "admin/footer.html" %}

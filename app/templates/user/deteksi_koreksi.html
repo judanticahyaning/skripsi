@@ -14,38 +14,41 @@
 						</div>
 					</div>
 				</div>
-				<div class="card-box mb-30">
-					<div class="pd-20">
-						<form action="{{ url_for('proses_deteksi_koreksi') }}" method="post">
+				<form action="{{ url_for('simpan_jawaban') }}" method="post">
+					<div class="card-box mb-30">
+						<div class="pd-20">
 							<div class="form-group">
-								<b><label>Responden</label></b>
-								<select class="form-control" name="responden">
-									<option>Pilih Responden</option>
-									{% for row in list_responden %}
-										<option value="{{row.id}}">{{row.nama}}</option>
-									{% endfor %}
-								</select>
-							</div>
-							<div class="form-group">
-								<b><label>Pertanyaan</label></b>
-								<select class="form-control" name="pertanyaan">
-									<option>Pilih Pertanyaan</option>
-									{% for row in tanya %}
-										<option value="{{row.id_pertanyaan}}">{{row.pertanyaan}}</option>
-									{% endfor %}
-								</select>
-							</div>
-							<div class="form-group">
-								<b><label>Jawaban</label></b>
-								<textarea name="jawaban" id="jawaban" class="form-control" required placeholder="Isi Jawabanmu Disini" >{{jawaban}}</textarea>
-							</div>
-							<div class="form-group">
-								<button type="submit" class="btn btn-primary">Proses</button>
-							</div>
-						</form>
+									<b><label>Responden</label></b>
+									<input type="hidden" name="id_responden" id="id_responden" class="form-control" value="{{user.id}}">
+									<input type="text" name="responden" id="responden" class="form-control" value="{{user.nama}}">
+<!--									<select class="form-control" name="responden">-->
+<!--										<option>Pilih Responden</option>-->
+<!--										{% for row in list_responden %}-->
+<!--											<option value="{{row.id}}">{{row.nama}}</option>-->
+<!--										{% endfor %}-->
+<!--									</select>-->
+								</div>
+						</div>
 					</div>
-				</div>
-
+					{% for row in tanya %}
+					<div class="card-box mb-30">
+						<div class="pd-20">
+								<div class="form-group">
+									<b><label>Pertanyaan</label></b>
+									<input type="hidden" name="id_tanya" id="id_tanya"  class="form-control" required value="{{row.id_pertanyaan}}">
+									<input name="pertanyaan" id="pertanyaan"  class="form-control" required value="{{row.pertanyaan}}">
+								</div>
+								<div class="form-group">
+									<b><label>Jawaban</label></b>
+									<textarea name="jawaban" id="jawaban" class="form-control" required placeholder="Isi Jawabanmu Disini" >{{jawaban}}</textarea>
+								</div>
+						</div>
+					</div>
+					{% endfor %}
+					<div class="form-group">
+						<button type="submit" class="btn btn-primary">Proses</button>
+					</div>
+				</form>
 			</div>
 		</div>
 </div>

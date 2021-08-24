@@ -65,6 +65,7 @@ class responden(db.Model):
 class akun(db.Model, UserMixin):
     id = db.Column(db.Integer, unique=True, primary_key=True, nullable=False)
     nama = db.Column(db.String(512), nullable=False)
+    jenis_kelamin = db.Column(db.String(15), nullable=False)
     username = db.Column(db.String(512), nullable = False, unique=True)
     password = db.Column(db.String(512), nullable=False)
     privileges = db.Column(db.String(15), nullable=False)

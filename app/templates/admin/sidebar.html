@@ -1,7 +1,6 @@
 <div class="left-side-bar">
 		<div class="brand-logo">
 			<a href="#">
-<!--				<img src="static/vendors/images/deskapp-logo.svg" alt="" class="dark-logo">-->
 				<img src="static/vendors/images/abc_scoring.png" alt="logo_abc" width="200" align="center">
 			</a>
 			<div class="close-sidebar" data-toggle="left-sidebar-close">
@@ -18,7 +17,16 @@
 					</li>
 					<li class="dropdown">
 						<a href="javascript:;" class="dropdown-toggle">
-							<span class="micon dw dw-book"></span><span class="mtext">Daftar Kamus</span>
+							<span class="micon dw dw-list"></span><span class="mtext">Daftar</span>
+						</a>
+						<ul class="submenu">
+							<li><a href="{{ url_for('daftar_pertanyaan') }}">Pertanyaan</a></li>
+							<li><a href="{{ url_for('responden') }}">Responden</a></li>
+						</ul>
+					</li>
+					<li class="dropdown">
+						<a href="javascript:;" class="dropdown-toggle">
+							<span class="micon dw dw-book"></span><span class="mtext">Kamus</span>
 						</a>
 						<ul class="submenu">
 							<li><a href="{{ url_for('kamus_kata') }}">KBBI</a></li>

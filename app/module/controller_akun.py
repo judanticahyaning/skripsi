@@ -41,6 +41,7 @@ def daftar():
 def daftar_akun():
   if request.method == "POST":
     nama_lengkap = request.form['nama_lengkap']
+    jenis = request.form['optradio']
     nama_pengguna = request.form['nama_pengguna']
     kata_sandi = request.form['kata_sandi']
     privileges = request.form['privileges']
@@ -59,7 +60,7 @@ def daftar_akun():
       return redirect(url_for('daftar'))
     else:
       #add user to database
-      daftar_akun = akun(nama=nama_lengkap, username=nama_pengguna, password=generate_password_hash(kata_sandi, method="sha256"), privileges=privileges)
+      daftar_akun = akun(nama=nama_lengkap, jenis_kelamin=jenis, username=nama_pengguna, password=generate_password_hash(kata_sandi, method="sha256"), privileges=privileges)
       db.session.add(daftar_akun)
       db.session.commit()
       cek_akun = akun.query.filter_by(username=nama_pengguna).first()
