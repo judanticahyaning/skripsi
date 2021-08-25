@@ -52,6 +52,36 @@ class trigram(db.Model):
         self.trigram = trigram
         self.jumlah_kemunculan = jumlah_kemunculan
 
+class unigrams(db.Model):
+    id_unigrams = db.Column(db.Integer, unique=True, primary_key=True, nullable=False)
+    unigrams = db.Column(db.Integer, nullable=False)
+    kemunculan = db.Column(db.String,nullable=False)
+
+    def __repr__(self, id_unigrams, unigrams, kemunculan):
+        self.id_unigrams = id_unigrams
+        self.unigrams = unigrams
+        self.kemunculan = kemunculan
+
+class bigrams(db.Model):
+    id_bigrams = db.Column(db.Integer, unique=True, primary_key=True, nullable=False)
+    bigrams = db.Column(db.Integer, nullable=False)
+    kemunculan = db.Column(db.String,nullable=False)
+
+    def __repr__(self, id_bigrams, bigrams, kemunculan):
+        self.id_bigrams = id_bigrams
+        self.bigrams = bigrams
+        self.kemunculan = kemunculan
+
+class trigrams(db.Model):
+    id_trigrams = db.Column(db.Integer, unique=True, primary_key=True, nullable=False)
+    trigrams = db.Column(db.Integer, nullable=False)
+    kemunculan = db.Column(db.String,nullable=False)
+
+    def __repr__(self, id_trigrams, trigrams, kemunculan):
+        self.id_trigrams = id_trigrams
+        self.trigrams = trigrams
+        self.kemunculan = kemunculan
+
 class responden(db.Model):
     id = db.Column(db.Integer, unique=True, primary_key=True, nullable=False)
     nama = db.Column(db.String(50), nullable=False)

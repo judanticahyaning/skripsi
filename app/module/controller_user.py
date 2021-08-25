@@ -679,13 +679,13 @@ async def proses_deteksi(responden, pertanyaan, jawab):
     depan_trigram = await huruf_depan(merge_trigram)
 
     # hitung jumlah kemunculan masing-masing n-gram
-    uni = engine.execute("SELECT unigram, CAST(SUM(jumlah_kemunculan) AS int) FROM unigram GROUP BY unigram")
+    uni = engine.execute("SELECT unigram, CAST(SUM(jumlah_kemunculan) AS int) FROM unigram GROUP BY unigram UNION SELECT unigrams, CAST(SUM(kemunculan) AS int) FROM unigrams GROUP BY unigrams")
     r_unigram = tuple([list(row) for row in uni])
     kata_uni = tuple([n for n in r_unigram if n[0][0] in depan_uni])
     muncul_uni = tuple([await kemunculan_unigram(kata_uni, unigram[i]) for i, value in enumerate(unigram)])
 
     # bigram kiri
-    kiri = engine.execute("SELECT bigram, CAST(SUM(jumlah_kemunculan) AS int) FROM bigram GROUP BY bigram")
+    kiri = engine.execute("SELECT bigram, CAST(SUM(jumlah_kemunculan) AS int) FROM bigram GROUP BY bigram UNION SELECT bigrams, CAST(SUM(kemunculan) AS int) FROM bigrams GROUP BY bigrams")
     r_bigram_kiri = tuple([list(row) for row in kiri])
     kata_kiri = tuple([n for n in r_bigram_kiri if n[0][0] in depan_kiri])
     muncul_kiri = tuple([await kemunculan_bigram_kiri(kata_kiri,bigram_kiri[i]) for i, value in enumerate(bigram_kiri)])
@@ -695,7 +695,7 @@ async def proses_deteksi(responden, pertanyaan, jawab):
     muncul_kanan = tuple([await kemunculan_bigram_kanan(kata_kanan, bigram_kanan[i]) for i, value in enumerate(bigram_kanan)])
 
     # trigram
-    tri = engine.execute("SELECT trigram, CAST(SUM(jumlah_kemunculan) AS int) FROM trigram GROUP BY trigram")
+    tri = engine.execute("SELECT trigram, CAST(SUM(jumlah_kemunculan) AS int) FROM trigram GROUP BY trigram UNION SELECT trigrams, CAST(SUM(kemunculan) AS int) FROM trigrams GROUP BY trigrams")
     r_trigram = tuple([list(row) for row in tri])
     kata_tri = tuple([n for n in r_trigram if n[0][0] in depan_trigram])
     muncul_tri = tuple([await kemunculan_trigram(kata_tri, trigram[i]) for i, value in enumerate(trigram)])

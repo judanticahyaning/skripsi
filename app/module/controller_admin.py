@@ -138,10 +138,19 @@ def kamus_kata():
 @login_required
 def korpus_ngram():
   engine = create_engine("mysql+mysqlconnector://root@localhost:3306/tugas_akhir", echo=False)
-  list_unigram = engine.execute("SELECT * FROM unigram").fetchall()
-  list_bigram = engine.execute("SELECT * FROM bigram").fetchall()
-  list_trigram = engine.execute("SELECT * FROM trigram").fetchall()
+  list_unigram = engine.execute("SELECT * FROM unigrams ").fetchall()
+  list_bigram = engine.execute("SELECT * FROM bigrams ").fetchall()
+  list_trigram = engine.execute("SELECT * FROM trigrams").fetchall()
   return render_template("admin/korpus_ngram.html", unigram=list_unigram, bigram=list_bigram, trigram=list_trigram, admin=current_user)
+
+@app.route('/kbbi_ngram')
+@login_required
+def kbbi_ngram():
+  engine = create_engine("mysql+mysqlconnector://root@localhost:3306/tugas_akhir", echo=False)
+  list_unigram = engine.execute("SELECT * FROM unigram ").fetchall()
+  list_bigram = engine.execute("SELECT * FROM bigram ").fetchall()
+  list_trigram = engine.execute("SELECT * FROM trigram").fetchall()
+  return render_template("admin/kbbi_ngram.html", unigram=list_unigram, bigram=list_bigram, trigram=list_trigram, admin=current_user)
 
 @app.route('/tambah_korpus_ngram', methods=['POST'])
 @login_required
@@ -181,20 +190,20 @@ def tambah_korpus_ngram():
     #unigram
     unigram_db = []
     unigram_db.append(list(freq_unigram.items()))
-    df_unigram = pd.DataFrame(list(freq_unigram.items()), columns=["Unigram", "Jumlah_Kemunculan"])
-    df_unigram.to_sql(con=engine, name='unigram', if_exists='append', index=False)
+    df_unigram = pd.DataFrame(list(freq_unigram.items()), columns=["Unigrams", "Kemunculan"])
+    df_unigram.to_sql(con=engine, name='unigrams', if_exists='append', index=False)
 
     #bigram
     bigram_db = []
     bigram_db.append(list(freq_bigram.items()))
-    df_bigram = pd.DataFrame(list(freq_bigram.items()), columns=["Bigram", "Jumlah_Kemunculan"])
-    df_bigram.to_sql(con=engine, name='bigram', if_exists='append', index=False)
+    df_bigram = pd.DataFrame(list(freq_bigram.items()), columns=["Bigrams", "Kemunculan"])
+    df_bigram.to_sql(con=engine, name='bigrams', if_exists='append', index=False)
 
     #trigram
     trigram_db = []
     trigram_db.append(list(freq_trigram.items()))
-    df_trigram = pd.DataFrame(list(freq_trigram.items()), columns=["Trigram", "Jumlah_Kemunculan"])
-    df_trigram.to_sql(con=engine, name='trigram', if_exists='append', index=False)
+    df_trigram = pd.DataFrame(list(freq_trigram.items()), columns=["Trigrams", "Kemunculan"])
+    df_trigram.to_sql(con=engine, name='trigrams', if_exists='append', index=False)
 
     # connect = db.raw_connection()
     # sql.write_frame(df_unigram, con=db, name='unigram', if_exists='append', flavor='mysql')
