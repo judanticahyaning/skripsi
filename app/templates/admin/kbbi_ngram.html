@@ -23,7 +23,7 @@
 						<table class="display table table-striped table-hover" cellspacing="0" width="100%" id="coba">
 							<thead>
 								<tr>
-									<th>ID</th>
+									<th>No</th>
                                     <th>Unigram</th>
                                     <th>Jumlah Kemunculan</th>
 								</tr>
@@ -31,7 +31,7 @@
 							<tbody>
 								{% for row in unigram %}
 								<tr>
-									<td>{{row.id_unigram}}</td>
+									<td>{{loop.index}}</td>
 									<td>{{row.unigram}}</td>
                                     <td>{{row.jumlah_kemunculan}}</td>
 								</tr>
@@ -48,7 +48,7 @@
 						<table class="display table table-striped table-hover" cellspacing="0" width="100%" id="bigram">
 							<thead>
 								<tr>
-									<th>ID</th>
+									<th>No</th>
                                     <th>Bigram</th>
                                     <th>Jumlah Kemunculan</th>
 								</tr>
@@ -56,7 +56,7 @@
 							<tbody>
 								{% for row in bigram %}
 								<tr>
-									<td>{{row.id_bigram}}</td>
+									<td>{{loop.index}}</td>
 									<td>{{row.bigram}}</td>
                                     <td>{{row.jumlah_kemunculan}}</td>
 								</tr>
@@ -73,7 +73,7 @@
 						<table class="display table table-striped table-hover" cellspacing="0" width="100%" id="trigram">
 							<thead>
 								<tr>
-									<th>ID</th>
+									<th>No</th>
                                     <th>Trigram</th>
                                     <th>Jumlah Kemunculan</th>
 								</tr>
@@ -81,7 +81,7 @@
 							<tbody>
 								{% for row in trigram %}
 								<tr>
-									<td>{{row.id_trigram}}</td>
+									<td>{{loop.index}}</td>
 									<td>{{row.trigram}}</td>
                                     <td>{{row.jumlah_kemunculan}}</td>
 								</tr>

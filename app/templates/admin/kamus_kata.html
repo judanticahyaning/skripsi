@@ -22,14 +22,14 @@
 						<table class="display table table-striped table-hover" cellspacing="0" width="100%" id="coba">
 							<thead>
 								<tr>
-									<th>ID</th>
+									<th>No</th>
 									<th>Kata</th>
 								</tr>
 							</thead>
 							<tbody>
 								{% for row in kata %}
 								<tr>
-									<td>{{row.id}}</td>
+									<td>{{loop.index}}</td>
 									<td>{{row.kata}}</td>
 								</tr>
 								{% endfor %}

@@ -79,7 +79,7 @@
 							<tbody>
 								{% for row in list_responden %}
 								<tr>
-									<td>{{row.id}}</td>
+									<td>{{loop.index}}</td>
 									<td>{{row.nama}}</td>
                                     <td>{{row.username}}</td>
                                     <td>{{row.jenis_kelamin}}</td>
@@ -198,8 +198,8 @@
 						<table class="display table table-striped table-hover" cellspacing="0" width="100%" id="bigram">
 							<thead>
                             	<tr>
-									<th>No</th>
-                                    <th>Nama Responden</th>
+                                    <th>No</th>
+									<th>Nama Responden</th>
                                     <th>Pertanyaan</th>
                                     <th>Jawaban</th>
                                     <th>Rekomendasi</th>
@@ -208,10 +208,10 @@
 								</tr>
                             </thead>
 							<tbody>
-								{% for row in list_jawaban %}
+                                {% for row in list_jawaban %}
 							    <tr>
-									<td>{{row.id_jawaban}}</td>
-                                    <td>{{row.nama}}</td>
+                                    <td>{{loop.index}}</td>
+									<td>{{row.nama}}</td>
 									<td>{{row.pertanyaan}}</td>
                                     <td>{{row.jawaban}}</td>
                                     <td>{{row.rekomendasi}}</td>
