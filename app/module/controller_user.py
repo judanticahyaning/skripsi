@@ -8,6 +8,7 @@ from sqlalchemy import create_engine
 from math import floor
 from collections import namedtuple
 from time import process_time
+from itertools import chain
 
 @app.route('/beranda_user')
 @login_required
@@ -81,7 +82,7 @@ def proses_deteksi(responden, pertanyaan, jawab):
 
     # preprocessing
     jawaban = jawab.lower()
-    token =  preprocessing(jawaban)
+    kal, clean, token =  preprocessing(jawaban)
 
     # perhitungan jarak token dengan kata kamus dgn jaro winkler
     sql = engine.execute("SELECT DISTINCT kata FROM kamus").fetchall()
@@ -91,10 +92,14 @@ def proses_deteksi(responden, pertanyaan, jawab):
     for i in token:
         i.insert(0, "_")
         i.insert(len(i), "_")
+    # print("case_folding" + jawaban)
+    # print("token_kal" + kal)
+    # print("filter" + clean)
+    # print("token" + token)
 
     # jaro winkler
     hsl =  jaro_kamus(token, hasil)
-    print(token)
+    # print(token)
 
     # pemodelan n-gram
     unigram = tuple([ buat_unigram(hsl[i]) for i, value in enumerate(token)])
@@ -134,15 +139,26 @@ def proses_deteksi(responden, pertanyaan, jawab):
     tot_trigram = tuple([ total_trigram(hsl[i], trigram[i]) for i, value in enumerate(trigram)])
 
     # hitung probabilitas
-    pro_unigram = tuple([ probabilitas_unigram(hsl[i], tot_unigram[i], unigram[i]) for i, value in enumerate(unigram)])
-    pro_bigram_kiri = tuple([ probabilitas_bigram_kiri(hsl[i], tot_bigram_kiri[i], bigram_kiri[i]) for i, value in enumerate(bigram_kiri)])
-    pro_bigram_kanan = tuple([ probabilitas_bigram_kanan(hsl[i], tot_bigram_kanan[i], bigram_kanan[i]) for i, value in enumerate(bigram_kanan)])
-    pro_trigram = tuple([ probabilitas_trigram(hsl[i], tot_trigram[i], trigram[i]) for i, value in enumerate(trigram)])
+    pro_uni = tuple([ probabilitas_unigram(hsl[i], tot_unigram[i], unigram[i]) for i, value in enumerate(unigram)])
+    pro_bi_ki = tuple([ probabilitas_bigram_kiri(hsl[i], tot_bigram_kiri[i], bigram_kiri[i]) for i, value in enumerate(bigram_kiri)])
+    pro_bi_ka = tuple([ probabilitas_bigram_kanan(hsl[i], tot_bigram_kanan[i], bigram_kanan[i]) for i, value in enumerate(bigram_kanan)])
+    pro_tri = tuple([ probabilitas_trigram(hsl[i], tot_trigram[i], trigram[i]) for i, value in enumerate(trigram)])
 
-    # hitung smoothing jelinek mercer
-    jelinek_kiri = tuple([ mercer_bigram_kiri(hsl[i], bigram_kiri[i], pro_unigram[i], pro_bigram_kiri[i]) for i, value in enumerate(bigram_kiri)])
-    jelinek_kanan = tuple([ mercer_bigram_kanan(hsl[i], bigram_kanan[i], pro_unigram[i], pro_bigram_kanan[i]) for i, value in enumerate(bigram_kanan)])
-    jelinek_trigram = tuple([ mercer_trigram(hsl[i], trigram[i], pro_bigram_kiri[i], pro_bigram_kanan[i], pro_trigram[i]) for i, value in enumerate(trigram)])
+    # untuk input ke db
+    pro_unigram = [j[1] for i in pro_uni for j in i],
+    pro_bigram_kiri = [j[1] for i in pro_bi_ki for j in i],
+    pro_bigram_kanan = [j[1] for i in pro_bi_ka for j in i],
+    pro_trigram = [j[1] for i in pro_tri for j in i],
+
+    # utk db
+    jel_kiri = tuple([ mercer_bigram_kiri(hsl[i], bigram_kiri[i], pro_unigram[i], pro_bigram_kiri[i]) for i, value in enumerate(bigram_kiri)])
+    jel_kanan = tuple([ mercer_bigram_kanan(hsl[i], bigram_kanan[i], pro_unigram[i], pro_bigram_kanan[i]) for i, value in enumerate(bigram_kanan)])
+    jel_tri = tuple([ mercer_trigram(hsl[i], trigram[i], pro_bigram_kiri[i], pro_bigram_kanan[i], pro_trigram[i]) for i, value in enumerate(trigram)])
+
+    # utk perhitungan
+    jelinek_kiri = [j[1] for i in jel_kiri for j in i],
+    jelinek_kanan = [j[1] for i in jel_kanan for j in i],
+    jelinek_trigram = [j[1] for i in jel_tri for j in i],
 
     # hitung skor
     skor_kata = tuple([ hitung_skor(hsl[i], jelinek_kiri[i], jelinek_kanan[i], jelinek_trigram[i]) for i, value in enumerate(hsl)])
@@ -155,16 +171,43 @@ def proses_deteksi(responden, pertanyaan, jawab):
     list_str = tuple([ to_str(new[i]) for i, value in enumerate(new)])
 
     rekomendasi = '. '.join([str(val) for val in list_str])
-    penilaian =  nilai(rekomendasi, kunci)
+    penilaian, dictkunci, dictjawaban, df, idfi, bobot_kunci, bobot_jawab, similaritas =  nilai(rekomendasi, kunci)
 
     end = process_time()
     waktu = end-start
-    # await asyncio.sleep(1)
-    # input semua hasil jawaban
-    sql = "INSERT INTO jawaban(id_responden, id_pertanyaan, jawaban, rekomendasi, nilai, waktu_proses) VALUES (%s, %s, %s, %s, %s, %s)"
-    data = (responden, pertanyaan, jawab, rekomendasi, penilaian, waktu)
-    proses = engine.execute(sql, data)
 
+    # ubah string utk db
+    db_token_kal = ','.join(kal)
+    db_clean = ','.join(clean)
+    db_token = ','.join(chain.from_iterable(token))
+    db_hsl = '%s' % (hsl)
+    db_uni = '%s' % (unigram)
+    db_bi_ki = '%s' % (bigram_kiri)
+    db_bi_ka = '%s' % (bigram_kanan)
+    db_tri = '%s' % (trigram)
+    db_pro_uni = '%s' % (pro_uni)
+    db_pro_bi_ki = '%s' % (pro_bi_ki)
+    db_pro_bi_ka = '%s' % (pro_bi_ka)
+    db_pro_tri = '%s' % (pro_tri)
+    db_jel_bi_ki = '%s' % (jel_kiri)
+    db_jel_bi_ka = '%s' % (jel_kanan)
+    db_jel_tri = '%s' % (jel_tri)
+    db_skor_kata = '%s' % (skor_kata)
+    db_rank = '%s' % (rank_skor)
+    db_dict_kunci = '%s' % (dictkunci)
+    db_dict_jawaban = '%s' % (dictjawaban)
+    db_df = '%s' % (df)
+    db_idfi = '%s' % (idfi)
+    db_bobot_kunci = '%s' % (bobot_kunci)
+    db_bobot_jawab = '%s' % (bobot_jawab)
+
+    # input semua hasil jawaban
+    sql = "INSERT INTO jawaban(id_responden, id_pertanyaan, jawaban, case_folding, token_kal, filter, token, jaro_wink, unigram, bigram_kiri, bigram_kanan, trigram, pro_uni, pro_bi_ki, pro_bi_ka, pro_tri, jelinek_kiri, jelinek_kanan, jelinek_trigram, " \
+          "skor_kata, rank, rekomendasi, tf_kunci, tf_jawaban, df, idfi, bobot_kunci, bobot_jawab,  similaritas, nilai, waktu_proses)" \
+          " VALUES (%s, %s, %s,%s,%s, %s,%s,%s,%s, %s, %s, %s, %s, %s, %s, %s, %s,%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+    data = (responden, pertanyaan, jawab, jawaban, db_token_kal, db_clean, db_token, db_hsl, db_uni, db_bi_ki, db_bi_ka, db_tri, db_pro_uni, db_pro_bi_ki, db_pro_bi_ka, db_pro_tri, db_jel_bi_ki, db_jel_bi_ka, db_jel_tri, db_skor_kata, db_rank, rekomendasi, db_dict_kunci, db_dict_jawaban, db_df, db_idfi, db_bobot_kunci, db_bobot_jawab, similaritas, penilaian, waktu)
+    proses = engine.execute(sql, data)
+    # sql = engine.execute("UPDATE responden SET rekomendasi=%s, nilai=%s, waktu_proses=%s WHERE id=%s",(new_nama, new_jenis_kelamin, id))
     print(waktu)
     print(rekomendasi, penilaian)
 

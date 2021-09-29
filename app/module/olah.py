@@ -130,10 +130,10 @@ def jaro_winkler(s1, s2):
 
 def preprocessing (jawaban):
     # tokenisasi kalimat
-    jawaban = sent_tokenize(jawaban)
+    token_kal = sent_tokenize(jawaban)
     # filtering
     str = []
-    for i in jawaban:
+    for i in token_kal:
         jawaban = re.sub(r'\d+', '', i)
         jawaban = re.sub(r'[^\w\s]', '', jawaban)
         # jawaban = jawaban.strip()
@@ -146,7 +146,7 @@ def preprocessing (jawaban):
         # token_kata.insert(0, "_")
         # token_kata.insert(len(kalimat), "_")
         token.append(token_kata)
-    return token
+    return token_kal, str, token
 
 def buat_unigram(result):
     unigram = []
@@ -290,8 +290,9 @@ def probabilitas_unigram(result, tot_unigram, unigram):
                 probabilitas = 0.0
             else:
                 probabilitas += value / total
-            # list_pro.append([key, probabilitas, total])
-            list_pro.append(probabilitas)
+            list_pro.append([key, probabilitas])
+            # list_pro.append(probabilitas)
+            # pro_uni.append([key, probabilitas])
             index_token += 1
             index_tot += 1
             length += len(result[index_token])
@@ -302,8 +303,9 @@ def probabilitas_unigram(result, tot_unigram, unigram):
                 probabilitas = 0.0
             else:
                 probabilitas += value / total
-            # list_pro.append([key, probabilitas, total])
-            list_pro.append(probabilitas)
+            list_pro.append([key, probabilitas])
+            # list_pro.append(probabilitas)
+            # pro_uni.append([key, probabilitas])
             # print(key, value)
         # print(type(probabilitas))
     print("pro_uni:" , len(list_pro))
@@ -324,8 +326,8 @@ def probabilitas_bigram_kiri (result, tot_bigram_kiri, bigram_kiri):
                 probabilitas = 0.0
             else:
                 probabilitas += value / total
-            # list_pro.append([key, probabilitas, total])
-            list_pro.append(probabilitas)
+            list_pro.append([key, probabilitas])
+            # list_pro.append(probabilitas)
             index_token += 1
             index_tot += 1
             length += len(result[index_token])
@@ -335,8 +337,8 @@ def probabilitas_bigram_kiri (result, tot_bigram_kiri, bigram_kiri):
                 probabilitas = 0.0
             else:
                 probabilitas += value / total
-            # list_pro.append([key, probabilitas, total])
-            list_pro.append(probabilitas)
+            list_pro.append([key, probabilitas])
+            # list_pro.append(probabilitas)
             # print(key, value)
     print("pro_bi_ki:", len(list_pro))
     return list_pro
@@ -354,8 +356,8 @@ def probabilitas_bigram_kanan(result, tot_bigram_kanan, bigram_kanan):
                 probabilitas = 0.0
             else:
                 probabilitas += value / total
-            # list_pro.append([key, probabilitas, total])
-            list_pro.append(probabilitas)
+            list_pro.append([key, probabilitas])
+            # list_pro.append(probabilitas)
             index_token += 1
             index_tot += 1
             length += len(result[index_token])
@@ -365,8 +367,8 @@ def probabilitas_bigram_kanan(result, tot_bigram_kanan, bigram_kanan):
                 probabilitas = 0.0
             else:
                 probabilitas += value / total
-            # list_pro.append([key, probabilitas, total])
-            list_pro.append(probabilitas)
+            list_pro.append([key, probabilitas])
+            # list_pro.append(probabilitas)
             # print(key, value)
     print("pro_bi_ka", len(list_pro))
     return list_pro
@@ -384,8 +386,8 @@ def probabilitas_trigram(result,tot_trigram, trigram):
                 probabilitas = 0.0
             else:
                 probabilitas += value / total
-            # list_pro.append([key, probabilitas, total])
-            list_pro.append(probabilitas)
+            list_pro.append([key, probabilitas])
+            # list_pro.append(probabilitas)
             index_token += 1
             index_tot += 1
             length += len(result[index_token])
@@ -395,8 +397,8 @@ def probabilitas_trigram(result,tot_trigram, trigram):
                 probabilitas = 0.0
             else:
                 probabilitas += value / total
-            # list_pro.append([key, probabilitas, total])
-            list_pro.append(probabilitas)
+            list_pro.append([key, probabilitas])
+            # list_pro.append(probabilitas)
             # print(key, value)
     print("pro_bi_tri:", len(list_pro))
     return list_pro
@@ -418,16 +420,16 @@ def mercer_bigram_kiri (result, bigram_kiri, pro_unigram, pro_bigram_kiri):
             # print(key, prob_uni)
             # print(key, prob_bi_ki)
             smooth += (val_lambda * prob_bi_ki) + (1 - val_lambda) * prob_uni
-            # list_smooth.append([key, smooth])
-            list_smooth.append(smooth)
+            list_smooth.append([key, smooth])
+            # list_smooth.append(smooth)
             index_token += 1
             length += len(result[index_token])
             # print(list_smooth)
         else:
             # print(key, prob_bi_ki)
             smooth += (val_lambda * prob_bi_ki) + (1 - val_lambda) * prob_uni
-            list_smooth.append(smooth)
-            # list_smooth.append([key, smooth])
+            # list_smooth.append(smooth)
+            list_smooth.append([key, smooth])
             # print(key, value)
         index_uni += 1
         index_bi_ki += 1
@@ -451,14 +453,16 @@ def mercer_bigram_kanan(result, bigram_kanan, pro_unigram, pro_bigram_kanan):
             # print(key, prob_uni)
             # print(key, prob_bi_ki)
             smooth += (val_lambda * prob_bi_ka) + (1 - val_lambda) * prob_uni
-            list_smooth.append(smooth)
+            list_smooth.append([key, smooth])
+            # list_smooth.append(smooth)
             index_token += 1
             length += len(result[index_token])
             # print(list_smooth)
         else:
             # print(key, prob_bi_ki)
             smooth += (val_lambda * prob_bi_ka) + (1 - val_lambda) * prob_uni
-            list_smooth.append(smooth)
+            list_smooth.append([key, smooth])
+            # list_smooth.append(smooth)
             # print(key, value)
         index_uni += 1
         index_bi_ka += 1
@@ -481,19 +485,22 @@ def mercer_trigram(result, trigram, pro_bigram_kiri, pro_bigram_kanan, pro_trigr
         if index == length:
             # print(key, value)
             smooth += (val_lambda * prob_trigram) + ((1 - val_lambda) * ((prob_bi_ki + prob_bi_ka) / 2))
-            list_smooth.append(smooth)
+            # list_smooth.append(smooth)
+            list_smooth.append([key, smooth])
         elif index == length - 1:
             # print(key, value)
             smooth += (val_lambda * prob_trigram) + ((1 - val_lambda) * ((prob_bi_ki + prob_bi_ka) / 2))
-            list_smooth.append(smooth)
+            # list_smooth.append(smooth)
+            list_smooth.append([key, smooth])
             index_token += 1
             length += len(result[index_token])
             # print(list_smooth)
         else:
             # print(key, prob_bi_ki)
             smooth += (val_lambda * prob_trigram) + ((1 - val_lambda) * ((prob_bi_ki + prob_bi_ka) / 2))
-            list_smooth.append(smooth)
+            # list_smooth.append(smooth)
             # print(key, value)
+            list_smooth.append([key, smooth])
         index_bi_ki += 1
         index_bi_ka += 1
         index_tri += 1
@@ -613,6 +620,10 @@ def jaro_kamus(token, hasil):
                 temp.append("tidak")
                 result[j] = temp
                 continue
+            if s1 == "utk":
+                temp.append("untuk")
+                result[j] = temp
+                continue
             for k in hasil:
                 jaro_wink = jaro.jaro_winkler_metric(s1, k)
                 # jaro = jaro_winkler(s1, k)
@@ -658,9 +669,9 @@ def nilai (rekomendasi, kunci):
 
     # jika term terdapat di dokumen beri nilai 1, jika tidak beri nilai 0
     for i in prepro_kunci:
-        katadictkunci[i] = 1
+        katadictkunci[i] += 1
     for kata in prepro_jawaban:
-        katadictjawaban[kata] = 1
+        katadictjawaban[kata] += 1
 
     # hitung df
     df = {}
@@ -675,6 +686,7 @@ def nilai (rekomendasi, kunci):
             df[key] += value
         else:
             df[key] = value
+    print(df)
 
     # hitung idfi
     idfi = {}
@@ -751,4 +763,4 @@ def nilai (rekomendasi, kunci):
             value = 90
         else:
             value = 100
-    return value
+    return value, katadictkunci, katadictjawaban, df, idfi, bobot_kunci, bobot_jawab, similaritas
