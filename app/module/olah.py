@@ -8,13 +8,13 @@ import nltk
 nltk.download('stopwords')
 import math
 
-def kemunculan_ngram(db, ngram, jenis=None):
-    if jenis=="unigram":
-        for i in db:
-            kata = i[0]
-            for j in ngram:
-                if kata == j[0]:
-                    j[1] = i[1]
+def kemunculan_ngram(db, ngram):
+    # if jenis=="unigram":
+    #     for i in db:
+    #         kata = i[0]
+    #         for j in ngram:
+    #             if kata == j[0]:
+    #                 j[1] = i[1]
                 # else:
                 #     j[1]=0
         # print("muncul_uni:", len(unigram))
@@ -53,7 +53,7 @@ def hitung_ngram(depan, merge, ngram, jenis):
     db = tuple([list(row) for row in sql])
     kata = tuple([n for n in db if n[0][0] in depan])
     for i, value in enumerate(ngram):
-        kemunculan_ngram(kata, ngram[i], "unigram")
+        kemunculan_ngram(kata, ngram[i])
     # tuple([kemunculan_ngram(kata, ngram[i], "unigram") for i, value in enumerate(ngram)])
     # return muncul
     # for i in ngram:
@@ -212,14 +212,14 @@ def total_unigram(result, unigram):
     print("total_uni : ", list_total)
     return list_total
 
-def total_bigram_kiri(result, bigram_kiri):
+def total_bigram_trigram (result, ngram):
     index_token = 1
     total = 0
     length = len(result[index_token])
     # print(result[i])
     list_total = []
-    for index, (key, value) in enumerate(bigram_kiri):
-        if index == len(bigram_kiri) - 1:
+    for index, (key, value) in enumerate(ngram):
+        if index == len(ngram) - 1:
             list_total.append(total)
         if index == length:
             # print(key,value)
@@ -230,47 +230,6 @@ def total_bigram_kiri(result, bigram_kiri):
 
         total += value
     print("total_bi_ki : ", list_total)
-    return list_total
-
-def total_bigram_kanan(result, bigram_kanan):
-    index_token = 1
-    total = 0
-    length = len(result[index_token])
-    list_total = []
-
-    for index, (key, value) in enumerate(bigram_kanan):
-        # print(key, value)
-        if index == len(bigram_kanan) - 1:
-            list_total.append(total)
-
-        if index == length:
-            list_total.append(total)
-            index_token += 1
-            length += len(result[index_token])
-            total = 0
-
-        total += value
-    print("tot_bi_ka:", list_total)
-    return list_total
-
-def total_trigram(result,trigram):
-    index_token = 1
-    total = 0
-    length = len(result[index_token])
-    list_total = []
-
-    for index, (key, value) in enumerate(trigram):
-        if index == len(trigram) - 1:
-            list_total.append(total)
-
-        if index == length:
-            list_total.append(total)
-            index_token += 1
-            length += len(result[index_token])
-            total = 0
-
-        total += value
-    print("total_tri : ", list_total)
     return list_total
 
 def probabilitas_unigram(result, tot_unigram, unigram):
@@ -311,14 +270,14 @@ def probabilitas_unigram(result, tot_unigram, unigram):
     print("pro_uni:" , len(list_pro))
     return list_pro
 
-def probabilitas_bigram_kiri (result, tot_bigram_kiri, bigram_kiri):
+def probabilitas_bigram_trigram(result, tot_ngram, ngram):
     index_token = 1
     length = len(result[index_token])
     list_pro = []
     index_tot = 0
-    for index, (key, value) in enumerate(bigram_kiri):
+    for index, (key, value) in enumerate(ngram):
         probabilitas = 0
-        total = tot_bigram_kiri[index_tot]
+        total = tot_ngram[index_tot]
         # if index==len(bigram_kiri)-1:
         #     break
         if index == length - 1:
@@ -343,83 +302,23 @@ def probabilitas_bigram_kiri (result, tot_bigram_kiri, bigram_kiri):
     print("pro_bi_ki:", len(list_pro))
     return list_pro
 
-def probabilitas_bigram_kanan(result, tot_bigram_kanan, bigram_kanan):
-    index_token = 1
-    length = len(result[index_token])
-    list_pro = []
-    index_tot = 0
-    for index, (key, value) in enumerate(bigram_kanan):
-        probabilitas = 0
-        total = tot_bigram_kanan[index_tot]
-        if index == length - 1:
-            if total == 0:
-                probabilitas = 0.0
-            else:
-                probabilitas += value / total
-            list_pro.append([key, probabilitas])
-            # list_pro.append(probabilitas)
-            index_token += 1
-            index_tot += 1
-            length += len(result[index_token])
-            # print(index_tot)
-        else:
-            if total == 0:
-                probabilitas = 0.0
-            else:
-                probabilitas += value / total
-            list_pro.append([key, probabilitas])
-            # list_pro.append(probabilitas)
-            # print(key, value)
-    print("pro_bi_ka", len(list_pro))
-    return list_pro
-
-def probabilitas_trigram(result,tot_trigram, trigram):
-    index_token = 1
-    length = len(result[index_token])
-    list_pro = []
-    index_tot = 0
-    for index, (key, value) in enumerate(trigram):
-        probabilitas = 0
-        total = tot_trigram[index_tot]
-        if index == length - 1:
-            if total == 0:
-                probabilitas = 0.0
-            else:
-                probabilitas += value / total
-            list_pro.append([key, probabilitas])
-            # list_pro.append(probabilitas)
-            index_token += 1
-            index_tot += 1
-            length += len(result[index_token])
-            # print(index_tot)
-        else:
-            if total == 0:
-                probabilitas = 0.0
-            else:
-                probabilitas += value / total
-            list_pro.append([key, probabilitas])
-            # list_pro.append(probabilitas)
-            # print(key, value)
-    print("pro_bi_tri:", len(list_pro))
-    return list_pro
-
-def mercer_bigram_kiri (result, bigram_kiri, pro_unigram, pro_bigram_kiri):
+def mercer_bi_ki_ka (result, bigram, pro_unigram, pro_bigram):
     index_token = 1
     length = len(result[index_token])
     list_smooth = []
     index_uni = 0
-    index_bi_ki = 0
-    for index, (key, value) in enumerate(bigram_kiri):
+    index_ki_ka = 0
+    for index, (key, value) in enumerate(bigram):
         val_lambda = 0.1
         smooth = 0.0
         prob_uni = pro_unigram[index_uni]
-        prob_bi_ki = pro_bigram_kiri[index_bi_ki]
+        prob_ki_ka = pro_bigram[index_ki_ka]
         # if index==len(result)-1:
         #     break
         if index == length - 1:
             # print(key, prob_uni)
             # print(key, prob_bi_ki)
-            smooth += (val_lambda * prob_bi_ki) + (1 - val_lambda) * prob_uni
+            smooth += (val_lambda * prob_ki_ka) + (1 - val_lambda) * prob_uni
             list_smooth.append([key, smooth])
             # list_smooth.append(smooth)
             index_token += 1
@@ -427,46 +326,13 @@ def mercer_bigram_kiri (result, bigram_kiri, pro_unigram, pro_bigram_kiri):
             # print(list_smooth)
         else:
             # print(key, prob_bi_ki)
-            smooth += (val_lambda * prob_bi_ki) + (1 - val_lambda) * prob_uni
+            smooth += (val_lambda * prob_ki_ka) + (1 - val_lambda) * prob_uni
             # list_smooth.append(smooth)
             list_smooth.append([key, smooth])
             # print(key, value)
         index_uni += 1
-        index_bi_ki += 1
+        index_ki_ka += 1
     print("mercer_kiri:", len(list_smooth))
-    return list_smooth
-
-def mercer_bigram_kanan(result, bigram_kanan, pro_unigram, pro_bigram_kanan):
-    index_token = 1
-    length = len(result[index_token])
-    list_smooth = []
-    index_uni = 0
-    index_bi_ka = 0
-    for index, (key, value) in enumerate(bigram_kanan):
-        val_lambda = 0.1
-        smooth = 0.0
-        prob_uni = pro_unigram[index_uni]
-        prob_bi_ka = pro_bigram_kanan[index_bi_ka]
-        # if index == 0:
-        #     continue
-        if index == length - 1:
-            # print(key, prob_uni)
-            # print(key, prob_bi_ki)
-            smooth += (val_lambda * prob_bi_ka) + (1 - val_lambda) * prob_uni
-            list_smooth.append([key, smooth])
-            # list_smooth.append(smooth)
-            index_token += 1
-            length += len(result[index_token])
-            # print(list_smooth)
-        else:
-            # print(key, prob_bi_ki)
-            smooth += (val_lambda * prob_bi_ka) + (1 - val_lambda) * prob_uni
-            list_smooth.append([key, smooth])
-            # list_smooth.append(smooth)
-            # print(key, value)
-        index_uni += 1
-        index_bi_ka += 1
-    print("mercer_kanan:", len(list_smooth))
     return list_smooth
 
 def mercer_trigram(result, trigram, pro_bigram_kiri, pro_bigram_kanan, pro_trigram):
@@ -536,6 +402,7 @@ def hitung_skor(result, jelinek_kiri, jelinek_kanan, jelinek_trigram):
 def skor_ranking(result, skor_kata):
     index_skor = 0
     ranking = []
+    tri_rank = []
     temp = []
     for i in result:
         if i == 0:
@@ -548,7 +415,7 @@ def skor_ranking(result, skor_kata):
             if (j == len(result[i]) - 1):
                 # rank = sorted(temp, key=itemgetter(1), reverse=True)
                 maks =max(temp, key=itemgetter(1))
-                # ranking.append(rank[:3])
+                # tri_rank.append(rank[:3])
                 ranking.append(maks)
                 temp.clear()
             index_skor += 1
@@ -559,6 +426,30 @@ def skor_ranking(result, skor_kata):
     for i in ranking:
         rekomen.append(i[0])
     return rekomen
+
+def rank_tri(result, skor_kata):
+    index_skor = 0
+    ranking = []
+    temp = []
+    for i in result:
+        if i == 0:
+            continue
+        if i == len(result) - 1:
+            break
+        for j, value in enumerate(result[i]):
+            skor = skor_kata[index_skor]
+            temp.append(skor)
+            if (j == len(result[i]) - 1):
+                rank = sorted(temp, key=itemgetter(1), reverse=True)
+                # maks =max(temp, key=itemgetter(1))
+                ranking.append(rank[:3])
+                # ranking.append(maks)
+                temp.clear()
+            index_skor += 1
+            # print(value)
+            # print(ranking[1])
+
+    return ranking
 
 def ubah(rank_skor, list_jawab):
     new = []
@@ -652,6 +543,14 @@ def prepro_scoring(a):
                 token.append(kata)
     return token
 
+def df(documents):
+    df_dict = dict.fromkeys(documents[0].keys(), 0)
+    for document in documents:
+        for kata, val in document.items():
+            if val > 0:
+                df_dict[kata] += 1
+    return df_dict
+
 def nilai (rekomendasi, kunci):
     n = len([kunci, rekomendasi])
     # case folding
@@ -674,23 +573,24 @@ def nilai (rekomendasi, kunci):
         katadictjawaban[kata] += 1
 
     # hitung df
-    df = {}
-    for key, value in katadictkunci.items():
-        if key in df:
-            df[key] += value
-        else:
-            df[key] = value
-
-    for key, value in katadictjawaban.items():
-        if key in df:
-            df[key] += value
-        else:
-            df[key] = value
-    print(df)
+    # df = {}
+    # for key, value in katadictkunci.items():
+    #     if key in df:
+    #         df[key] += value
+    #     else:
+    #         df[key] = value
+    #
+    # for key, value in katadictjawaban.items():
+    #     if key in df:
+    #         df[key] += value
+    #     else:
+    #         df[key] = value
+    # print(df)
+    dfi = df([katadictkunci, katadictjawaban])
 
     # hitung idfi
     idfi = {}
-    for key, value in df.items():
+    for key, value in dfi.items():
         idfi[key] = math.log10(n / value) + 1
 
     # hitung bobot
@@ -763,4 +663,8 @@ def nilai (rekomendasi, kunci):
             value = 90
         else:
             value = 100
-    return value, katadictkunci, katadictjawaban, df, idfi, bobot_kunci, bobot_jawab, similaritas
+    return value, katadictkunci, katadictjawaban, dfi, idfi, bobot_kunci, bobot_jawab, similaritas
+
+def ubah_db(a):
+    db = [value[1] for i, value in enumerate(a)]
+    return db

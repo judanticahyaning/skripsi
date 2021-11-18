@@ -134,37 +134,39 @@ def proses_deteksi(responden, pertanyaan, jawab):
 
     # hitung total kemunculan
     tot_unigram = tuple([ total_unigram(hsl[i], unigram[i]) for i, value in enumerate(unigram)])
-    tot_bigram_kiri = tuple([ total_bigram_kiri(hsl[i], bigram_kiri[i]) for i, value in enumerate(bigram_kiri)])
-    tot_bigram_kanan = tuple([ total_bigram_kanan(hsl[i], bigram_kanan[i]) for i, value in enumerate(bigram_kanan)])
-    tot_trigram = tuple([ total_trigram(hsl[i], trigram[i]) for i, value in enumerate(trigram)])
+    tot_bigram_kiri = tuple([ total_bigram_trigram(hsl[i], bigram_kiri[i]) for i, value in enumerate(bigram_kiri)])
+    tot_bigram_kanan = tuple([ total_bigram_trigram(hsl[i], bigram_kanan[i]) for i, value in enumerate(bigram_kanan)])
+    tot_trigram = tuple([ total_bigram_trigram(hsl[i], trigram[i]) for i, value in enumerate(trigram)])
 
-    # hitung probabilitas
+    # db
     pro_uni = tuple([ probabilitas_unigram(hsl[i], tot_unigram[i], unigram[i]) for i, value in enumerate(unigram)])
-    pro_bi_ki = tuple([ probabilitas_bigram_kiri(hsl[i], tot_bigram_kiri[i], bigram_kiri[i]) for i, value in enumerate(bigram_kiri)])
-    pro_bi_ka = tuple([ probabilitas_bigram_kanan(hsl[i], tot_bigram_kanan[i], bigram_kanan[i]) for i, value in enumerate(bigram_kanan)])
-    pro_tri = tuple([ probabilitas_trigram(hsl[i], tot_trigram[i], trigram[i]) for i, value in enumerate(trigram)])
+    pro_bi_ki = tuple([ probabilitas_bigram_trigram(hsl[i], tot_bigram_kiri[i], bigram_kiri[i]) for i, value in enumerate(bigram_kiri)])
+    pro_bi_ka = tuple([ probabilitas_bigram_trigram(hsl[i], tot_bigram_kanan[i], bigram_kanan[i]) for i, value in enumerate(bigram_kanan)])
+    pro_tri = tuple([ probabilitas_bigram_trigram(hsl[i], tot_trigram[i], trigram[i]) for i, value in enumerate(trigram)])
 
-    # untuk input ke db
-    pro_unigram = [j[1] for i in pro_uni for j in i],
-    pro_bigram_kiri = [j[1] for i in pro_bi_ki for j in i],
-    pro_bigram_kanan = [j[1] for i in pro_bi_ka for j in i],
-    pro_trigram = [j[1] for i in pro_tri for j in i],
+    # perhitungan
+    pro_unigram =  tuple([ubah_db(pro_uni[j]) for j, value in enumerate(pro_uni)])
+    pro_bigram_kiri = tuple([ubah_db(pro_bi_ki[j]) for j, value in enumerate(pro_bi_ki)])
+    pro_bigram_kanan = tuple([ubah_db(pro_bi_ka[j]) for j, value in enumerate(pro_bi_ka)])
+    pro_trigram = tuple([ubah_db(pro_tri[j]) for j, value in enumerate(pro_tri)])
 
     # utk db
-    jel_kiri = tuple([ mercer_bigram_kiri(hsl[i], bigram_kiri[i], pro_unigram[i], pro_bigram_kiri[i]) for i, value in enumerate(bigram_kiri)])
-    jel_kanan = tuple([ mercer_bigram_kanan(hsl[i], bigram_kanan[i], pro_unigram[i], pro_bigram_kanan[i]) for i, value in enumerate(bigram_kanan)])
+    jel_kiri = tuple([ mercer_bi_ki_ka(hsl[i], bigram_kiri[i], pro_unigram[i], pro_bigram_kiri[i]) for i, value in enumerate(bigram_kiri)])
+    jel_kanan = tuple([ mercer_bi_ki_ka(hsl[i], bigram_kanan[i], pro_unigram[i], pro_bigram_kanan[i]) for i, value in enumerate(bigram_kanan)])
     jel_tri = tuple([ mercer_trigram(hsl[i], trigram[i], pro_bigram_kiri[i], pro_bigram_kanan[i], pro_trigram[i]) for i, value in enumerate(trigram)])
 
     # utk perhitungan
-    jelinek_kiri = [j[1] for i in jel_kiri for j in i],
-    jelinek_kanan = [j[1] for i in jel_kanan for j in i],
-    jelinek_trigram = [j[1] for i in jel_tri for j in i],
+    jelinek_kiri = tuple([ubah_db(jel_kiri[j]) for j, value in enumerate(jel_kiri)])
+    jelinek_kanan = tuple([ubah_db(jel_kanan[j]) for j, value in enumerate(jel_kanan)])
+    jelinek_trigram = tuple([ubah_db(jel_tri[j]) for j, value in enumerate(jel_tri)])
 
     # hitung skor
     skor_kata = tuple([ hitung_skor(hsl[i], jelinek_kiri[i], jelinek_kanan[i], jelinek_trigram[i]) for i, value in enumerate(hsl)])
 
     # peringkatan
     rank_skor = tuple([ skor_ranking(hsl[i], skor_kata[i]) for i, value in enumerate(hsl)])
+    tri_rank = tuple([ rank_tri(hsl[i], skor_kata[i]) for i, value in enumerate(hsl)])
+    print(tri_rank)
 
     new = tuple([ ubah(rank_skor[i], token[i]) for i, value in enumerate(rank_skor)])
 
@@ -181,19 +183,19 @@ def proses_deteksi(responden, pertanyaan, jawab):
     db_clean = ','.join(clean)
     db_token = ','.join(chain.from_iterable(token))
     db_hsl = '%s' % (hsl)
-    db_uni = '%s' % (unigram)
-    db_bi_ki = '%s' % (bigram_kiri)
-    db_bi_ka = '%s' % (bigram_kanan)
-    db_tri = '%s' % (trigram)
-    db_pro_uni = '%s' % (pro_uni)
-    db_pro_bi_ki = '%s' % (pro_bi_ki)
-    db_pro_bi_ka = '%s' % (pro_bi_ka)
-    db_pro_tri = '%s' % (pro_tri)
-    db_jel_bi_ki = '%s' % (jel_kiri)
-    db_jel_bi_ka = '%s' % (jel_kanan)
-    db_jel_tri = '%s' % (jel_tri)
-    db_skor_kata = '%s' % (skor_kata)
-    db_rank = '%s' % (rank_skor)
+    db_uni = '%s' % ([value for i, value in enumerate(unigram)])
+    db_bi_ki = '%s' % ([value for i, value in enumerate(bigram_kiri)])
+    db_bi_ka = '%s' % ([value for i, value in enumerate(bigram_kanan)])
+    db_tri = '%s' % ([value for i, value in enumerate(trigram)])
+    db_pro_uni = '%s' % ([value for i, value in enumerate(pro_uni)])
+    db_pro_bi_ki = '%s' % ([value for i, value in enumerate(pro_bi_ki)])
+    db_pro_bi_ka = '%s' % ([value for i, value in enumerate(pro_bi_ka)])
+    db_pro_tri = '%s' % ([value for i, value in enumerate(pro_tri)])
+    db_jel_bi_ki = '%s' % ([value for i, value in enumerate(jel_kiri)])
+    db_jel_bi_ka = '%s' % ([value for i, value in enumerate(jel_kanan)])
+    db_jel_tri = '%s' % ([value for i, value in enumerate(jel_tri)])
+    db_skor_kata = '%s' % ([value for i, value in enumerate(skor_kata)])
+    db_rank = '%s' % ([value for i, value in enumerate(tri_rank)])
     db_dict_kunci = '%s' % (dictkunci)
     db_dict_jawaban = '%s' % (dictjawaban)
     db_df = '%s' % (df)

@@ -83,10 +83,7 @@ def responden():
     engine = create_engine("mysql+mysqlconnector://root@localhost:3306/tugas_akhir", echo=False)
     list_responden = engine.execute("SELECT * FROM akun WHERE NOT privileges='admin'").fetchall()
     list_jawaban = engine.execute(
-        "SELECT jawaban.id_jawaban, akun.nama, pertanyaan.pertanyaan, jawaban.jawaban, jawaban.case_folding, jawaban.token_kal, jawaban.filter, jawaban.token, jawaban.jaro_wink, "
-        "jawaban.unigram, jawaban.bigram_kiri, jawaban.bigram_kanan, jawaban.trigram, jawaban.pro_uni, jawaban.pro_bi_ki, jawaban.pro_bi_ka, jawaban.pro_tri, jawaban.jelinek_kiri, jawaban.jelinek_kanan, jawaban.jelinek_trigram, jawaban.skor_kata,"
-        "jawaban.rank, jawaban.rekomendasi, jawaban.tf_kunci, jawaban.tf_jawaban, jawaban.df, jawaban.idfi, jawaban.bobot_kunci,"
-        "jawaban.bobot_jawab, jawaban.similaritas, jawaban.nilai FROM jawaban "
+        "SELECT jawaban.id_jawaban, akun.nama, pertanyaan.pertanyaan, jawaban.jawaban, jawaban.rekomendasi, jawaban.nilai FROM jawaban "
         "INNER JOIN akun ON akun.id=jawaban.id_responden "
         "INNER JOIN pertanyaan ON pertanyaan.id_pertanyaan=jawaban.id_pertanyaan").fetchall()
     return render_template('admin/responden.html', list_responden=list_responden, list_jawaban=list_jawaban, admin=current_user)
@@ -103,10 +100,21 @@ def tambah_responden():
     proses = engine.execute(sql,data)
     return redirect(url_for('responden'))
 
-@app.route('/lihat_responden')
+# @app.route('/show_responden')
+@app.route('/show_responden<id_jawaban>')
 @login_required
-def lihat_responden():
-  return redirect(url_for('responden'))
+def lihat_responden(id_jawaban):
+  engine = create_engine("mysql+mysqlconnector://root@localhost:3306/tugas_akhir", echo=False)
+  jawaban = engine.execute(
+    "SELECT jawaban.id_jawaban, akun.nama, pertanyaan.pertanyaan, jawaban.jawaban, jawaban.case_folding, jawaban.token_kal, jawaban.filter, jawaban.token, jawaban.jaro_wink, "
+    "jawaban.unigram, jawaban.bigram_kiri, jawaban.bigram_kanan, jawaban.trigram, jawaban.pro_uni, jawaban.pro_bi_ki, jawaban.pro_bi_ka, jawaban.pro_tri, jawaban.jelinek_kiri, jawaban.jelinek_kanan, jawaban.jelinek_trigram, jawaban.skor_kata,"
+    "jawaban.rank, jawaban.rekomendasi, jawaban.tf_kunci, jawaban.tf_jawaban, jawaban.df, jawaban.idfi, jawaban.bobot_kunci,"
+    "jawaban.bobot_jawab, jawaban.similaritas, jawaban.nilai FROM jawaban "
+    "INNER JOIN akun ON akun.id=jawaban.id_responden "
+    "INNER JOIN pertanyaan ON pertanyaan.id_pertanyaan=jawaban.id_pertanyaan "
+    "WHERE id_jawaban="+ id_jawaban).fetchall()
+  print(jawaban)
+  return render_template('admin/detail.html', jawaban=jawaban, admin=current_user)
 
 @app.route('/edit_responden', methods = ['POST'])
 @login_required

@@ -12,12 +12,6 @@
 								<h4>Responden</h4>
 							</div>
 						</div>
-<!--						<div class="col-md-6 col-sm-12 text-right">-->
-<!--							<button id="showModal" class="btn btn-warning btn-round ml-auto" data-toggle="modal" data-target="#tambahResponden">-->
-<!--                            <i class="fa fa-plus"></i>-->
-<!--                            Tambah Responden-->
-<!--                            </button>-->
-<!--						</div>-->
 					</div>
 				</div>
 				<!-- Simple Datatable start -->
@@ -26,45 +20,6 @@
                         <h5>Daftar Responden</h5>
                         <hr>
 					</div>
-                    <!-- Modal -->
-<!--                    <div class="modal fade" id="tambahResponden" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">-->
-<!--                          <div class="modal-dialog">-->
-<!--                              <div class="modal-content">-->
-<!--                                  <div class="modal-header">-->
-<!--                                    <h5 class="modal-title" id="staticBackdropLabel">Tambah Responden</h5>-->
-<!--                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">-->
-<!--                                      <span aria-hidden="true">&times;</span>-->
-<!--                                    </button>-->
-<!--                                  </div>-->
-<!--                              <div class="modal-body">-->
-<!--                                  <form action="{{url_for('tambah_responden')}}" method="post">-->
-<!--                                      <div class="form-group">-->
-<!--                                          <b><label>Nama Lengkap</label></b>-->
-<!--                                          <input type="text" name="nama" id="nama" class="form-control" required placeholder="Isi Namamu Disini" >-->
-<!--&lt;!&ndash;                                          <textarea name="nama" id="nama" class="form-control" required placeholder="Isi Namamu Disini" ></textarea>&ndash;&gt;-->
-<!--                                      </div>-->
-<!--                                      <div class="form-group">-->
-<!--                                          <b><label>Jenis kelamin</label></b><br>-->
-<!--                                          <div class="form-check">-->
-<!--                                              <label class="form-check-label">-->
-<!--                                                <input type="radio" class="form-check-input" name="optradio" value="Laki">Laki-laki-->
-<!--                                              </label>-->
-<!--                                          </div>-->
-<!--                                          <div class="form-check">-->
-<!--                                              <label class="form-check-label">-->
-<!--                                                <input type="radio" class="form-check-input" name="optradio" value="Perempuan">Perempuan-->
-<!--                                              </label>-->
-<!--                                          </div>-->
-<!--                                      </div>-->
-<!--                                      <div class="modal-footer">-->
-<!--                                        <button type="submit" class="btn btn-primary">Tambah</button>-->
-<!--                                        <button type="button" class="btn btn-danger" data-dismiss="modal">Keluar</button>-->
-<!--                                      </div>-->
-<!--                                  </form>-->
-<!--                              </div>-->
-<!--                              </div>-->
-<!--                          </div>-->
-<!--                      </div>-->
 					<div class="pb-20">
 						<table class="display table table-striped table-hover" cellspacing="0" width="100%" id="coba">
 							<thead>
@@ -144,46 +99,6 @@
                                   </div>
                               </div>
                             </div>
-<!--                            modal edit    -->
-<!--                                <div class="modal fade" id="editResponden{{row.id}}" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">&ndash;&gt;-->
-<!--                                <div class="modal-dialog">-->
-<!--                                  <div class="modal-content">-->
-<!--                                      <div class="modal-header">-->
-<!--                                        <h5 class="modal-title" id="staticBackdropLabel">Edit Responden</h5>-->
-<!--                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">-->
-<!--                                          <span aria-hidden="true">&times;</span>-->
-<!--                                        </button>-->
-<!--                                      </div>-->
-<!--                                  <div class="modal-body">-->
-<!--                                      <form action="{{ url_for('edit_responden') }}" method="post">-->
-<!--                                          <div class="form-group">-->
-<!--                                              <b><label>Nama Lengkap</label></b>-->
-<!--                                              <input type="hidden" name="id" id="id" class="form-control" value="{{row.id}}" >-->
-<!--                                              <input type="text" name="edit_nama" id="edit_nama" class="form-control" value="{{row.nama}}" >-->
-<!--                                          </div>-->
-<!--                                          <div class="form-group">-->
-<!--                                              <b><label>Jenis kelamin</label></b><br>-->
-<!--                                              <div class="form-check">-->
-<!--                                                  <label class="form-check-label">-->
-<!--                                                  {% if row.jenis_kelamin == "Laki": %}-->
-<!--                                                    <input type="radio" class="form-check-input" name="optradio" value="Laki-laki" checked >Laki-laki <br>-->
-<!--                                                    <input type="radio" class="form-check-input" name="optradio" value="Perempuan" >Perempuan-->
-<!--                                                  {% else: %}-->
-<!--                                                    <input type="radio" class="form-check-input" name="optradio" value="Laki-laki"  >Laki-laki <br>-->
-<!--                                                    <input type="radio" class="form-check-input" name="optradio" value="Perempuan" checked>Perempuan-->
-<!--                                                  {% endif%}-->
-<!--                                                  </label>-->
-<!--                                              </div>-->
-<!--                                          </div>-->
-<!--                                          <div class="modal-footer">-->
-<!--                                            <button type="submit" class="btn btn-primary">Edit</button>-->
-<!--                                            <button type="button" class="btn btn-danger" data-dismiss="modal">Keluar</button>-->
-<!--                                          </div>-->
-<!--                                      </form>-->
-<!--                                  </div>-->
-<!--                                  </div>-->
-<!--                              </div>-->
-<!--                            </div>-->
 								{% endfor %}
 							</tbody>
 						</table>
@@ -192,7 +107,6 @@
                 <div class="card-box mb-30">
 					<div class="pd-20">
                         <h5>Daftar Jawaban Responden</h5>
-                        <hr>
 					</div>
                     <div class="pb-20">
 						<table class="display table table-striped table-hover" cellspacing="0" width="100%" id="bigram">
@@ -222,160 +136,16 @@
 												<i class="dw dw-more"></i>
 											</a>
 											<div class="dropdown-menu dropdown-menu-right dropdown-menu-icon-list">
-                                                <a class="dropdown-item" href="/lihat_responden/{{row.id_jawaban}}" data-toggle="modal" data-target="#hasil{{row.id_jawaban}}"><i class="dw dw-eye"></i>Lihat</a>
+                                                <a class="dropdown-item" href="{{ url_for('lihat_responden', id_jawaban=row.id_jawaban) }}"><i class="dw dw-eye"></i>Lihat</a>
                                             </div>
                                         </div>
                                     </td>
 								</tr>
-<!--                                modal view-->
-                                <div class="modal fade" id="hasil{{row.id_jawaban}}" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">-->
-                                    <div class="modal-dialog">
-                                        <div class="modal-content">
-                                          <div class="modal-header">
-                                            <h5 class="modal-title" id="staticBackdropLabel">Lihat Jawaban</h5>
-                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                              <span aria-hidden="true">&times;</span>
-                                            </button>
-                                        </div>
-                                        <div class="modal-body">
-                                          <form action="" method="post">
-                                              <div class="form-group">
-                                                  <b><label>Responden</label></b>
-                                                  <input type="text" name="responden" id="responden" class="form-control" value="{{row.nama}}" >
-                                              </div>
-                                              <div class="form-group">
-                                                  <b><label>Pertanyaan</label></b>
-                                                  <textarea name="pertanyaan" id="pertanyaan" class="form-control" >{{row.pertanyaan}}</textarea>
-<!--                                                  <input type="text" name="pertanyaan" id="pertanyaan" class="form-control" value="{{row.pertanyaan}}" >-->
-                                              </div>
-                                              <div class="form-group">
-                                                  <b><label>Jawaban</label></b>
-                                                  <textarea name="jawaban" id="jawaban" class="form-control" >{{row.jawaban}}</textarea>
-                                              </div>
-                                              <div class="form-group">
-                                                  <b><label>Case Folding</label></b>
-                                                  <textarea name="case_folding" id="case_folding" class="form-control" >{{row.case_folding}}</textarea>
-                                              </div>
-                                              <div class="form-group">
-                                                  <b><label>Tokenisasi Kalimat</label></b>
-                                                  <textarea name="token_kal" id="token_kal" class="form-control" >{{row.token_kal}}</textarea>
-                                              </div>
-                                              <div class="form-group">
-                                                  <b><label>Filtering</label></b>
-                                                  <textarea name="filter" id="filter" class="form-control" >{{row.filter}}</textarea>
-                                              </div>
-                                              <div class="form-group">
-                                                  <b><label>Tokenisasi Kata</label></b>
-                                                  <textarea name="kata" id="kata" class="form-control" >{{row.token}}</textarea>
-                                              </div>
-                                              <div class="form-group">
-                                                  <b><label>Hasil Jaro Winkler</label></b>
-                                                  <textarea name="jaro" id="jaro" class="form-control" >{{row.jaro_wink}}</textarea>
-                                              </div>
-                                              <div class="form-group">
-                                                  <b><label>Unigram</label></b>
-                                                  <textarea name="uni" id="uni" class="form-control" >{{row.unigram}}</textarea>
-                                              </div>
-                                              <div class="form-group">
-                                                  <b><label>Bigram Kiri</label></b>
-                                                  <textarea name="bi_ki" id="bi_ki" class="form-control" >{{row.bigram_kiri}}</textarea>
-                                              </div>
-                                              <div class="form-group">
-                                                  <b><label>Bigram Kanan</label></b>
-                                                  <textarea name="bi_ka" id="bi_ka" class="form-control" >{{row.bigram_kanan}}</textarea>
-                                              </div>
-                                              <div class="form-group">
-                                                  <b><label>Trigram</label></b>
-                                                  <textarea name="tri" id="tri" class="form-control" >{{row.trigram}}</textarea>
-                                              </div>
-                                              <div class="form-group">
-                                                  <b><label>Probabilitas Unigram</label></b>
-                                                  <textarea name="pro_uni" id="pro_uni" class="form-control" >{{row.pro_uni}}</textarea>
-                                              </div>
-                                              <div class="form-group">
-                                                  <b><label>Probabilitas Bigram Kiri</label></b>
-                                                  <textarea name="pro_bi_ki" id="pro_bi_ki" class="form-control" >{{row.pro_bi_ki}}</textarea>
-                                              </div>
-                                              <div class="form-group">
-                                                  <b><label>Probabilitas Bigram Kanan</label></b>
-                                                  <textarea name="pro_bi_ka" id="pro_bi_ka" class="form-control" >{{row.pro_bi_ka}}</textarea>
-                                              </div>
-                                              <div class="form-group">
-                                                  <b><label>Probabilitas Trigram</label></b>
-                                                  <textarea name="pro_tri" id="pro_tri" class="form-control" >{{row.pro_tri}}</textarea>
-                                              </div>
-                                              <div class="form-group">
-                                                  <b><label>Probabilitas Jelinek Bigram Kiri</label></b>
-                                                  <textarea name="jel_bi_ki" id="jel_bi_ki" class="form-control" >{{row.jelinek_kiri}}</textarea>
-                                              </div>
-                                               <div class="form-group">
-                                                  <b><label>Probabilitas Jelinek Bigram Kanan</label></b>
-                                                  <textarea name="jel_bi_ka" id="jel_bi_ka" class="form-control" >{{row.jelinek_kanan}}</textarea>
-                                              </div>
-                                               <div class="form-group">
-                                                  <b><label>Probabilitas Jelinek Trigram</label></b>
-                                                  <textarea name="jel_tri" id="jel_tri" class="form-control" >{{row.jelinek_trigram}}</textarea>
-                                              </div>
-                                              <div class="form-group">
-                                                  <b><label>Skor Kata</label></b>
-                                                  <textarea name="skor" id="skor" class="form-control" >{{row.skor_kata}}</textarea>
-                                              </div>
-                                              <div class="form-group">
-                                                  <b><label>Ranking</label></b>
-                                                  <textarea name="rank" id="rank" class="form-control" >{{row.rank}}</textarea>
-                                              </div>
-                                              <div class="form-group">
-                                                  <b><label>TF Kunci Jawaban</label></b>
-                                                  <textarea name="tf_kunci" id="tf_kunci" class="form-control" >{{row.tf_kunci}}</textarea>
-                                              </div>
-                                               <div class="form-group">
-                                                  <b><label>TF Jawaban</label></b>
-                                                  <textarea name="tf_jawaban" id="tf_jawaban" class="form-control" >{{row.tf_jawaban}}</textarea>
-                                              </div>
-                                              <div class="form-group">
-                                                  <b><label>DF</label></b>
-                                                  <textarea name="df" id="df" class="form-control" >{{row.df}}</textarea>
-                                              </div>
-                                               <div class="form-group">
-                                                  <b><label>IDF</label></b>
-                                                  <textarea name="idfi" id="idfi" class="form-control" >{{row.idfi}}</textarea>
-                                              </div>
-                                              <div class="form-group">
-                                                  <b><label>Bobot Kunci</label></b>
-                                                  <textarea name="bobot_kunci" id="bobot_kunci" class="form-control" >{{row.bobot_kunci}}</textarea>
-                                              </div>
-                                              <div class="form-group">
-                                                  <b><label>Bobot Jawaban</label></b>
-                                                  <textarea name="bobot_jawab" id="bobot_jawab" class="form-control" >{{row.bobot_jawab}}</textarea>
-                                              </div>
-                                              <div class="form-group">
-                                                  <b><label>Similaritas</label></b>
-                                                  <input type="text" name="similaritas" id="similaritas" class="form-control" value="{{row.similaritas}}" >
-                                              </div>
-                                              <div class="form-group">
-                                                  <b><label>Rekomendasi</label></b>
-                                                  <textarea name="rekomendasi" id="rekomendasi" class="form-control" >{{row.rekomendasi}}</textarea>
-                                              </div>
-                                              <div class="form-group">
-                                                  <b><label>Nilai</label></b>
-                                                  <input type="text" name="nilai" id="nilai" class="form-control" value="{{row.nilai}}" >
-                                              </div>
-                                              <div class="modal-footer">
-                                                <button type="button" class="btn btn-danger" data-dismiss="modal">Keluar</button>
-                                              </div>
-                                          </form>
-                                        </div>
-                                    </div>
-                                </div>
-                                </div>
                                 {% endfor %}
 							</tbody>
 						</table>
 					</div>
                 </div>
-
-				<!-- Simple Datatable End -->
-				<!-- multiple select row Datatable start -->
 			</div>
 		</div>
     </div>
