@@ -7,6 +7,7 @@ from operator import itemgetter
 import nltk
 nltk.download('stopwords')
 import math
+from Sastrawi.Stemmer.StemmerFactory import StemmerFactory
 
 def kemunculan_ngram(db, ngram):
     # if jenis=="unigram":
@@ -40,6 +41,7 @@ def hitung_ngram(depan, merge, ngram, jenis):
     kata = ', '.join(list(map(lambda x: '%s', merge)))
     if jenis == "unigram":
         # hitung jumlah kemunculan masing-masing n-gram
+        # CAST AS digunakan untuk convert tipe data
         sql = engine.execute("SELECT * FROM (SELECT unigram, CAST(SUM(jumlah_kemunculan) AS int) FROM unigram GROUP BY unigram UNION SELECT unigrams as unigram, CAST(SUM(kemunculan) AS int) FROM unigrams GROUP BY unigram ) AS U WHERE U.unigram IN (%s)" % kata, merge)
         # sql = engine.execute(
         #     f"SELECT unigram, CAST(SUM(jumlah_kemunculan) AS int) FROM unigram GROUP BY unigram UNION SELECT unigrams, CAST(SUM(kemunculan) AS int) FROM unigrams GROUP BY unigrams WHERE unigram IN {merge}")
@@ -484,7 +486,7 @@ def satu_dimensi_token(token):
 
 def huruf_depan(a):
     # sort dan groupby => utk huruf depan token
-    util_func = lambda x: x[0]
+    util_func = lambda x: x[0] #lambda yaitu sebuah ekspresi utk membuat sebuah fungsi, diambillah x index 0 yaitu katanya
     temp = sorted(a, key=util_func)
     res = [list(ele) for i, ele in groupby(temp, util_func)]
     # utk nentuin huruf depan token
@@ -551,6 +553,15 @@ def df(documents):
                 df_dict[kata] += 1
     return df_dict
 
+def stemming(a):
+    dasar = []
+    for i in a :
+        factory = StemmerFactory()
+        stemmer = factory.create_stemmer()
+        b = stemmer.stem(i)
+        dasar.append(b)
+    return dasar
+
 def nilai (rekomendasi, kunci):
     n = len([kunci, rekomendasi])
     # case folding
@@ -561,15 +572,19 @@ def nilai (rekomendasi, kunci):
     prepro_kunci =  prepro_scoring(kunci)
     prepro_jawaban =  prepro_scoring(jawaban)
 
+    #tambahan stemming
+    stem_kunci = stemming(prepro_kunci)
+    stem_jawaban = stemming(prepro_jawaban)
+
     # menggabungkan + isi default 0
-    set_kata = set(prepro_kunci).union(set(prepro_jawaban))
+    set_kata = set(stem_kunci).union(set(stem_jawaban))
     katadictkunci = dict.fromkeys(set_kata, 0)
     katadictjawaban = dict.fromkeys(set_kata, 0)
 
     # jika term terdapat di dokumen beri nilai 1, jika tidak beri nilai 0
-    for i in prepro_kunci:
+    for i in stem_kunci:
         katadictkunci[i] += 1
-    for kata in prepro_jawaban:
+    for kata in stem_jawaban:
         katadictjawaban[kata] += 1
 
     # hitung df
@@ -642,24 +657,24 @@ def nilai (rekomendasi, kunci):
             similaritas = total / (kunci * jawab)
 
         if (similaritas == 0.0):
-            value=0
-        elif (similaritas >= 0.01 and similaritas <= 0.10):
+            value = 0
+        elif (similaritas < 0.11):
             value = 10
-        elif (similaritas >= 0.11 and similaritas <= 0.20):
+        elif (similaritas < 0.21):
             value = 20
-        elif (similaritas >= 0.21 and similaritas <= 0.30):
+        elif (similaritas < 0.31):
             value = 30
-        elif (similaritas >= 0.31 and similaritas <= 0.40):
+        elif (similaritas < 0.41):
             value = 40
-        elif (similaritas >= 0.41 and similaritas <= 0.50):
+        elif (similaritas < 0.51):
             value = 50
-        elif (similaritas >= 0.51 and similaritas <= 0.60):
+        elif (similaritas < 0.61):
             value = 60
-        elif (similaritas >= 0.61 and similaritas <= 0.70):
+        elif (similaritas < 0.71):
             value = 70
-        elif (similaritas >= 0.71 and similaritas <= 0.80):
+        elif (similaritas < 0.81):
             value = 80
-        elif (similaritas >= 0.81 and similaritas <= 0.90):
+        elif (similaritas < 0.91):
             value = 90
         else:
             value = 100

@@ -24,10 +24,19 @@
 <!--							<li><a href="{{ url_for('responden') }}">Responden</a></li>-->
 <!--						</ul>-->
 <!--					</li>-->
-					<li>
-						<a href="{{ url_for('percobaan') }}" class="dropdown-toggle no-arrow">
+<!--					<li>-->
+<!--						<a href="{{ url_for('percobaan') }}" class="dropdown-toggle no-arrow">-->
+<!--							<span class="micon dw dw-check"></span><span class="mtext">Percobaan</span>-->
+<!--						</a>-->
+<!--					</li>-->
+					<li class="dropdown">
+						<a href="javascript:;" class="dropdown-toggle">
 							<span class="micon dw dw-check"></span><span class="mtext">Percobaan</span>
 						</a>
+						<ul class="submenu">
+							<li><a href="{{ url_for('percobaan') }}">Deteksi + Scoring</a></li>
+							<li><a href="{{ url_for('penilaian') }}">Scoring</a></li>
+						</ul>
 					</li>
 					<li>
 						<a href="{{ url_for('deteksi_koreksi') }}" class="dropdown-toggle no-arrow">

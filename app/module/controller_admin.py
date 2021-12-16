@@ -86,7 +86,11 @@ def responden():
         "SELECT jawaban.id_jawaban, akun.nama, pertanyaan.pertanyaan, jawaban.jawaban, jawaban.rekomendasi, jawaban.nilai FROM jawaban "
         "INNER JOIN akun ON akun.id=jawaban.id_responden "
         "INNER JOIN pertanyaan ON pertanyaan.id_pertanyaan=jawaban.id_pertanyaan").fetchall()
-    return render_template('admin/responden.html', list_responden=list_responden, list_jawaban=list_jawaban, admin=current_user)
+    list_scoring = engine.execute(
+      "SELECT scoring.id_scoring, akun.nama, pertanyaan.pertanyaan, pertanyaan.kunci_jawaban, scoring.jawaban, scoring.nilai FROM scoring "
+      "INNER JOIN akun ON akun.id=scoring.id_responden "
+      "INNER JOIN pertanyaan ON pertanyaan.id_pertanyaan=scoring.id_pertanyaan").fetchall()
+    return render_template('admin/responden.html', list_responden=list_responden, list_jawaban=list_jawaban, list_scoring=list_scoring, admin=current_user)
 
 @app.route('/tambah_responden', methods = ['POST'])
 @login_required
@@ -100,10 +104,22 @@ def tambah_responden():
     proses = engine.execute(sql,data)
     return redirect(url_for('responden'))
 
-# @app.route('/show_responden')
-@app.route('/show_responden<id_jawaban>')
+@app.route('/lihat_scoring<id_scoring>')
 @login_required
-def lihat_responden(id_jawaban):
+def lihat_scoring(id_scoring):
+  engine = create_engine("mysql+mysqlconnector://root@localhost:3306/tugas_akhir", echo=False)
+  scoring = engine.execute(
+  "SELECT akun.nama, pertanyaan.pertanyaan, pertanyaan.kunci_jawaban, scoring.jawaban, scoring.term_kunci, scoring.term_jawaban, scoring.df,"
+  "scoring.idf, scoring.bobot_kunci, scoring.bobot_jawaban, scoring.similaritas, scoring.nilai FROM scoring "
+  "INNER JOIN akun ON akun.id=scoring.id_responden "
+  "INNER JOIN pertanyaan ON pertanyaan.id_pertanyaan=scoring.id_pertanyaan "
+  "WHERE id_scoring="+ id_scoring).fetchall()
+  return render_template('admin/detail_scoring.html', scoring=scoring, admin=current_user)
+
+# @app.route('/show_responden')
+@app.route('/lihat_jawaban<id_jawaban>')
+@login_required
+def lihat_jawaban(id_jawaban):
   engine = create_engine("mysql+mysqlconnector://root@localhost:3306/tugas_akhir", echo=False)
   jawaban = engine.execute(
     "SELECT jawaban.id_jawaban, akun.nama, pertanyaan.pertanyaan, jawaban.jawaban, jawaban.case_folding, jawaban.token_kal, jawaban.filter, jawaban.token, jawaban.jaro_wink, "

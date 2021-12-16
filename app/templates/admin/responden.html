@@ -44,7 +44,7 @@
 												<i class="dw dw-more"></i>
 											</a>
 											<div class="dropdown-menu dropdown-menu-right dropdown-menu-icon-list">
-												<a class="dropdown-item" href="/lihat_responden/{{row.id}}" data-toggle="modal" data-target="#lihatResponden{{row.id}}"><i class="dw dw-eye"></i>Lihat</a>
+												<a class="dropdown-item" data-toggle="modal" data-target="#lihatResponden{{row.id}}"><i class="dw dw-eye"></i>Lihat</a>
 <!--												<a class="dropdown-item" href="/edit_responden/{{row.id}}" data-toggle="modal" data-target="#editResponden{{row.id}}"><i class="dw dw-edit2"></i>Edit</a>-->
 <!--												<a class="dropdown-item" href="/hapus_responden/{{row.id}}"><i class="dw dw-delete-3"></i>Hapus</a>-->
 											</div>
@@ -106,7 +106,7 @@
 				</div>
                 <div class="card-box mb-30">
 					<div class="pd-20">
-                        <h5>Daftar Jawaban Responden</h5>
+                        <h5>Daftar Jawaban Responden (Deteksi + Scoring)</h5>
 					</div>
                     <div class="pb-20">
 						<table class="display table table-striped table-hover" cellspacing="0" width="100%" id="bigram">
@@ -136,7 +136,49 @@
 												<i class="dw dw-more"></i>
 											</a>
 											<div class="dropdown-menu dropdown-menu-right dropdown-menu-icon-list">
-                                                <a class="dropdown-item" href="{{ url_for('lihat_responden', id_jawaban=row.id_jawaban) }}"><i class="dw dw-eye"></i>Lihat</a>
+                                                <a class="dropdown-item" href="{{ url_for('lihat_jawaban', id_jawaban=row.id_jawaban) }}"><i class="dw dw-eye"></i>Lihat</a>
+                                            </div>
+                                        </div>
+                                    </td>
+								</tr>
+                                {% endfor %}
+							</tbody>
+						</table>
+					</div>
+                </div>
+                <div class="card-box mb-30">
+					<div class="pd-20">
+                        <h5>Daftar Jawaban Responden (Scoring)</h5>
+					</div>
+                    <div class="pb-20">
+						<table class="display table table-striped table-hover" cellspacing="0" width="100%" id="trigram">
+							<thead>
+                            	<tr>
+                                    <th>No</th>
+									<th>Nama Responden</th>
+                                    <th>Pertanyaan</th>
+                                    <th>Kunci Jawaban</th>
+                                    <th>Jawaban</th>
+                                    <th>Nilai</th>
+                                    <th>Action</th>
+								</tr>
+                            </thead>
+							<tbody>
+                                {% for row in list_scoring %}
+							    <tr>
+                                    <td>{{loop.index}}</td>
+									<td>{{row.nama}}</td>
+									<td>{{row.pertanyaan}}</td>
+                                    <td>{{row.kunci_jawaban}}</td>
+                                    <td>{{row.jawaban}}</td>
+                                    <td>{{row.nilai}}</td>
+                                    <td>
+                                        <div class="dropdown">
+											<a class="btn btn-link font-24 p-0 line-height-1 no-arrow dropdown-toggle" href="#" role="button" data-toggle="dropdown">
+												<i class="dw dw-more"></i>
+											</a>
+											<div class="dropdown-menu dropdown-menu-right dropdown-menu-icon-list">
+                                                <a class="dropdown-item" href="{{ url_for('lihat_scoring', id_scoring=row.id_scoring) }}"><i class="dw dw-eye"></i>Lihat</a>
                                             </div>
                                         </div>
                                     </td>

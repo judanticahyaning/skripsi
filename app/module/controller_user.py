@@ -29,10 +29,11 @@ def grup_kamus(kamus):
 @login_required
 def deteksi_koreksi():
     engine = create_engine("mysql+mysqlconnector://root@localhost:3306/tugas_akhir", echo=False)
-    list_responden = engine.execute("SELECT * FROM responden").fetchall()
+    list_responden = engine.execute("SELECT * FROM akun").fetchall()
     listpertanyaan = pertanyaan.query.all()
     return render_template('user/deteksi_koreksi.html', tanya=listpertanyaan, list_responden=list_responden, user=current_user)
 
+# navbar percobaan
 @app.route('/percobaan')
 @login_required
 def percobaan():
@@ -41,7 +42,7 @@ def percobaan():
     # listpertanyaan = pertanyaan.query.all()
     return render_template('user/percobaan.html', tanyas=listpertanyaan, user=current_user)
 
-# loop = asyncio.get_event_loop()
+# proses navbar percobaan
 @app.route('/proses', methods = ['POST'])
 @login_required
 def proses():
@@ -57,6 +58,62 @@ def proses():
         print(end - start)
         return redirect('percobaan')
 
+# navbar scoring
+@app.route('/scoring')
+@login_required
+def penilaian():
+    engine = create_engine("mysql+mysqlconnector://root@localhost:3306/tugas_akhir", echo=False)
+    listpertanyaan = engine.execute("SELECT * FROM pertanyaan").fetchall()
+    # listpertanyaan = pertanyaan.query.all()
+    return render_template('user/scoring.html', tanyas=listpertanyaan, user=current_user)
+
+@app.route('/proses_score', methods = ['POST'])
+@login_required
+def proses_score():
+    if request.method == "POST":
+        start = process_time()
+
+        # responden = request.form['id_responden']
+        # pertanyaan = request.form['pertanyaan']
+        # jawaban = request.form['jawaban']
+        #
+        # score_esai(responden, jawaban, pertanyaan)
+
+        responden = request.form['id_responden']
+        pertanyaan = request.form.getlist('id_tanya')
+        jawaban = request.form.getlist('jawaban')
+
+        for pertanyaan, jawaban in zip(pertanyaan, jawaban):
+            score_esai(responden, jawaban, pertanyaan)
+
+        end = process_time()
+        print(end - start)
+        return redirect('percobaan')
+
+def score_esai(responden, jawaban, pertanyaan):
+    engine = create_engine("mysql+mysqlconnector://root@localhost:3306/tugas_akhir", echo=False)
+
+    sql = engine.execute("SELECT kunci_jawaban FROM pertanyaan WHERE id_pertanyaan=" + pertanyaan).fetchall()
+    kunci = tuple([row[0] for row in sql])
+
+    penilaian, dictkunci, dictjawaban, df, idfi, bobot_kunci, bobot_jawab, similaritas = nilai(jawaban, kunci)
+
+    db_dict_kunci = '%s' % (dictkunci)
+    db_dict_jawaban = '%s' % (dictjawaban)
+    db_df = '%s' % (df)
+    db_idfi = '%s' % (idfi)
+    db_bobot_kunci = '%s' % (bobot_kunci)
+    db_bobot_jawab = '%s' % (bobot_jawab)
+
+    sql = "INSERT INTO scoring(id_responden, id_pertanyaan, jawaban, term_kunci, term_jawaban, df, idf, bobot_kunci, bobot_jawaban, similaritas, nilai)" \
+          " VALUES (%s, %s, %s,%s,%s, %s,%s,%s,%s, %s, %s)"
+    data = (
+    responden, pertanyaan, jawaban, db_dict_kunci, db_dict_jawaban, db_df, db_idfi,
+    db_bobot_kunci, db_bobot_jawab, similaritas, penilaian)
+    proses = engine.execute(sql, data)
+
+
+# proses navbar deteksi dan koreksi
 @app.route('/simpan_jawaban', methods = ['POST'])
 @login_required
 def simpan_jawaban():
@@ -85,6 +142,7 @@ def proses_deteksi(responden, pertanyaan, jawab):
     kal, clean, token =  preprocessing(jawaban)
 
     # perhitungan jarak token dengan kata kamus dgn jaro winkler
+    # distinct ini tidak akan menampilkan data yang sama sbanyak 2x
     sql = engine.execute("SELECT DISTINCT kata FROM kamus").fetchall()
     hasil = tuple([row[0] for row in sql])
 
@@ -108,7 +166,7 @@ def proses_deteksi(responden, pertanyaan, jawab):
     trigram = tuple([ buat_trigram(token[i], hsl[i]) for i, value in enumerate(token)])
     # print(len((hsl)), len(token), len([unigram]), len(bigram_kanan), len(bigram_kiri), len(trigram))
 
-    # # merge
+    # # merge, menjadikan beberapa dimensi list menjadi 1 dimensi
     merge_uni =  satu_dimensi_token(unigram)
     merge_kiri =  satu_dimensi_token(bigram_kiri)
     merge_kanan =  satu_dimensi_token(bigram_kanan)
@@ -120,7 +178,7 @@ def proses_deteksi(responden, pertanyaan, jawab):
     merge_tri_new = tuple([x[0] for x in merge_trigram])
     # print(merge_uni_new)
 
-    # mencari kata depan masing2 (uni masih blm bisa kata depan)
+    # mencari kata depan masing2
     depan_uni =  huruf_depan(merge_uni_new)
     depan_kiri =  huruf_depan(merge_kiri_new)
     depan_kanan =  huruf_depan(merge_kanan_new)
@@ -144,7 +202,7 @@ def proses_deteksi(responden, pertanyaan, jawab):
     pro_bi_ka = tuple([ probabilitas_bigram_trigram(hsl[i], tot_bigram_kanan[i], bigram_kanan[i]) for i, value in enumerate(bigram_kanan)])
     pro_tri = tuple([ probabilitas_bigram_trigram(hsl[i], tot_trigram[i], trigram[i]) for i, value in enumerate(trigram)])
 
-    # perhitungan
+    # perhitungan, dari db diambil nilainya, probabilitas MLE
     pro_unigram =  tuple([ubah_db(pro_uni[j]) for j, value in enumerate(pro_uni)])
     pro_bigram_kiri = tuple([ubah_db(pro_bi_ki[j]) for j, value in enumerate(pro_bi_ki)])
     pro_bigram_kanan = tuple([ubah_db(pro_bi_ka[j]) for j, value in enumerate(pro_bi_ka)])
@@ -155,7 +213,7 @@ def proses_deteksi(responden, pertanyaan, jawab):
     jel_kanan = tuple([ mercer_bi_ki_ka(hsl[i], bigram_kanan[i], pro_unigram[i], pro_bigram_kanan[i]) for i, value in enumerate(bigram_kanan)])
     jel_tri = tuple([ mercer_trigram(hsl[i], trigram[i], pro_bigram_kiri[i], pro_bigram_kanan[i], pro_trigram[i]) for i, value in enumerate(trigram)])
 
-    # utk perhitungan
+    # utk perhitungan, diambil nilainya saja, probabilitas mercer
     jelinek_kiri = tuple([ubah_db(jel_kiri[j]) for j, value in enumerate(jel_kiri)])
     jelinek_kanan = tuple([ubah_db(jel_kanan[j]) for j, value in enumerate(jel_kanan)])
     jelinek_trigram = tuple([ubah_db(jel_tri[j]) for j, value in enumerate(jel_tri)])
