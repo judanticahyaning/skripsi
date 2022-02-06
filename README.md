@@ -1,4 +1,3 @@
-Tugas Akhir_Judanti Cahyaning Tyas
 Judul : "Deteksi dan Kesalahan Penulisan Kata Bahasa Indonesia Menggunakan N-Gram dan Jaro Winkler Pada Sistem Penilaian Esai"
 
 Hal seputar tugas akhir yang dikembangkan:
